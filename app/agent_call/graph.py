@@ -3,8 +3,12 @@ from dataclasses import dataclass
 from langgraph.graph import StateGraph, END
 from langgraph.types import Command
 from langgraph.runtime import Runtime
-from app.agent_call.external import r
+from app.agent_call.external import format_github_request
 from langgraph.checkpoint.memory import MemorySaver
+# import request
+import os
+from flask import jsonify,current_app
+
 
 # ---- State Definition ----
 def add(left, right):
@@ -18,6 +22,7 @@ def add(left, right):
 # class ContextSchema(TypedDict):
 #     respond: bool = False
 
+
 @dataclass
 class AgentState(TypedDict):
     date: str
@@ -26,7 +31,10 @@ class AgentState(TypedDict):
     # selected_request: Optional[int] = None
 
 def receiver_node(state:AgentState):
-    print(state)
+    payload = state['commits']
+    date = state['date'] 
+    formatted = format_github_request(payload=payload)
+    print(formatted)
     return {}
 
 # # ---- Node: Responder ----

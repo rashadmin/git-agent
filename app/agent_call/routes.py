@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from app.agent_call.graph import graph
-from app.agent_call.external import background_listener, active_thread_id
+from app.agent_call.external import format_github_request
 import threading
 from app.agent_call import bp
 # Start listener thread when app launches
