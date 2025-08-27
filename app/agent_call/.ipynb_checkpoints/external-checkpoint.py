@@ -28,6 +28,7 @@ def format_github_request(payload):
             r = requests.get(url, headers=headers)
             if r.status_code == 200:
                 data = r.json()
+                print(data)
                 # Content is base64 encoded by GitHub API
                 import base64
                 content = base64.b64decode(data["content"]).decode("utf-8")

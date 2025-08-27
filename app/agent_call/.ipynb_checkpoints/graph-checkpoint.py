@@ -31,7 +31,7 @@ class AgentState(TypedDict):
     # selected_request: Optional[int] = None
 
 def receiver_node(state:AgentState):
-    payload = state['commits']
+    payload = state['commits'][0]
     # date = state['date'] 
     formatted = format_github_request(payload=payload)
     print(formatted)
