@@ -32,7 +32,7 @@ class AgentState(TypedDict):
 
 def receiver_node(state:AgentState):
     payload = state['commits']
-    date = state['date'] 
+    # date = state['date'] 
     formatted = format_github_request(payload=payload)
     print(formatted)
     return {}
