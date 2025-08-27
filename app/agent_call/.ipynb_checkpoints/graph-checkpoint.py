@@ -26,17 +26,20 @@ def add(left, right):
 @dataclass
 class AgentState(TypedDict):
     date: str
-    commits:Annotated[List[dict],add]
+    commits:str
+    formatted_commits:Annotated[List[dict],add]
     # requests: Annotated[list[RequestEntry], add]
     # selected_request: Optional[int] = None
 
 def receiver_node(state:AgentState):
-    payload = state['commits'][0]
+    payload = state['commits']
     # date = state['date'] 
     formatted = format_github_request(payload=payload)
     print(formatted)
-    return {}
+    return {'formatted_commits':formatted}
 
+def extraction_node(state:AgentState):
+    
 # # ---- Node: Responder ----
 # def responder(state: AgentState):
 #     selected_request_id = state.get("selected_request", None)
