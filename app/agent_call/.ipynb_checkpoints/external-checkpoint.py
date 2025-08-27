@@ -12,9 +12,9 @@ def format_github_request(payload):
     after_commit = payload["after"]             # latest commit SHA
     changed_files = {}
     for commit in payload.get("commits", []):
-        changed_files['modified']=[i for i in commit.get("modified", []) if (i.find('/lib/') < 0 and  i.find('/bin/') < 0)]
-        changed_files['added'] = [i for i in commit.get("added", []) if (i.find('/lib/') < 0 and  i.find('/bin/') < 0)]
-        changed_files['removed'] = [i for i in commit.get("removed", []) if (i.find('/lib/') < 0 and  i.find('/bin/') < 0)]
+        changed_files['modified']=[i for i in commit.get("modified", []) if (i.find('/lib/') < 0 and (i.find('.ipynb_checkpoints')) and  i.find('/bin/') < 0)]
+        changed_files['added'] = [i for i in commit.get("added", []) if (i.find('/lib/') < 0 and (i.find('.ipynb_checkpoints')) and  i.find('/bin/') < 0)]
+        changed_files['removed'] = [i for i in commit.get("removed", []) if (i.find('/lib/') < 0 and (i.find('.ipynb_checkpoints')) and  i.find('/bin/') < 0)]
     
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     # print('yesssssssssssssssss')
@@ -28,7 +28,7 @@ def format_github_request(payload):
             r = requests.get(url, headers=headers)
             if r.status_code == 200:
                 data = r.json()
-                print(data)
+                # print(data)
                 # Content is base64 encoded by GitHub API
                 import base64
                 content = base64.b64decode(data["content"]).decode("utf-8")
