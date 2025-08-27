@@ -20,9 +20,10 @@ def format_github_request(payload):
 
     file_contents = {}
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-
+    print('yesssssssssssssssss')
     # Fetch the latest contents of each file
     for file_path in changed_files:
+        print('checking')
         url = f"{GITHUB_API_URL}/repos/{repo}/contents/{file_path}?ref={after_commit}"
         r = requests.get(url, headers=headers)
         if r.status_code == 200:
