@@ -7,6 +7,7 @@ def format_github_request(payload):
     GITHUB_TOKEN = current_app.config['GITHUB_TOKEN']
     GITHUB_API_URL = "https://api.github.com"
     event = request.headers.get("X-GitHub-Event")
+    print(event)
     if event != "push":
         return jsonify({"msg": "Not a push event"}), 200
 
