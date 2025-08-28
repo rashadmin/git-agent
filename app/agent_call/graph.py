@@ -78,7 +78,8 @@ def extraction_node(state:AgentState):
     structured_llm = llm.with_structured_output(schema=Repository)
     extracted_commit = structured_llm.invoke(commit_prompt)
     extracted_commit = [add_time(file) for file in extracted_commit.model_dump()['repository']]
-    return {'extracted_commits':extracted_commits}
+    print(extracted_commit)
+    return {'extracted_commits':extracted_commit}
 
 # ---- Graph Definition ----
 builder = StateGraph(AgentState)
