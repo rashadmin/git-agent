@@ -39,6 +39,7 @@ class Repository(BaseModel):
 
 @dataclass
 class AgentState(TypedDict):
+    commits:str
     formatted_commits:List[dict]
     extracted_commits:Annotated[List[dict],add]
     # requests: Annotated[list[RequestEntry], add]
