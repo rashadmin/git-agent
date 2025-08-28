@@ -69,6 +69,8 @@ prompt_template = ChatPromptTemplate([('system',
 def receiver_node(state:AgentState):
     payload = state['commits']
     formatted = format_github_request(payload=payload)
+    print('It was at receiver node')
+    print(formatted)
     return {'formatted_commits':formatted}
 
 def extraction_node(state:AgentState):
@@ -78,6 +80,8 @@ def extraction_node(state:AgentState):
     structured_llm = llm.with_structured_output(schema=Repository)
     extracted_commit = structured_llm.invoke(commit_prompt)
     extracted_commit = [add_time(file) for file in extracted_commit.model_dump()['repository']]
+    print('It was at extraction node')
+    print(commit_prompt)
     print(extracted_commit)
     return {'extracted_commits':extracted_commit}
 
