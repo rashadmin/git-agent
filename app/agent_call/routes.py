@@ -21,7 +21,7 @@ def ping_self():
         time.sleep(600)  # every 10 minutes
 
 
-@bp.before_first_request
+@bp.before_app_serving
 def activate_job():
     thread = threading.Thread(target=ping_self)
     thread.daemon = True
