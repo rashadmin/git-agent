@@ -45,7 +45,9 @@ def compose_text():
     # previous_day_thread_id = int(datetime.combine((datetime.today().date()-timedelta(days=1)),datetime.min.time()).timestamp())
     config = {"configurable": {"thread_id": previous_day_thread_id}}
     state = print(graph.get_state(config=config))
-    return 'hello00000000000000000world'
+    print(state.values['extracted_commits'])
+
+    return state.values['extracted_commits']
 
     # return jsonify({
     #     "thread_id": thread_id,
