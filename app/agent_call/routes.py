@@ -21,11 +21,11 @@ def ping_self():
         time.sleep(6000)  # every 10 minutes
 
 
-@bp.before_app_request
-def activate_job():
-    thread = threading.Thread(target=ping_self)
-    thread.daemon = True
-    thread.start()
+# @bp.before_app_request
+# def activate_job():
+#     thread = threading.Thread(target=ping_self)
+#     thread.daemon = True
+#     thread.start()
 
 @bp.route("/health")
 def health_check():
