@@ -2,10 +2,34 @@ from flask import Flask, request, jsonify
 from app.agent_call.graph import graph
 from app.agent_call.external import format_github_request
 import threading
+import time
+import requests
 from app.agent_call import bp
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
 # listener_thread.start()
+
+
+def ping_self():
+    """Keep the app alive by pinging itself periodically."""
+    while True:
+        try:
+            requests.get("https://git-agent.onrender.com/health")
+            print("Pinged successfully")
+        except Exception as e:
+            print(f"Ping failed: {e}")
+        time.sleep(600)  # every 10 minutes
+
+
+@bp.before_first_request
+def activate_job():
+    thread = threading.Thread(target=ping_self)
+    thread.daemon = True
+    thread.start()
+
+@bp.route("/health")
+def health_check():
+    return jsonify(status="ok")
 
 @bp.route("/agent", methods=["POST"])
 # @app.route("/agent")

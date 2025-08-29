@@ -67,11 +67,12 @@ prompt_template = ChatPromptTemplate([('system',
 
 
 
+
+
 def receiver_node(state:AgentState):
     payload = state['commits']
     formatted = format_github_request(payload=payload)
     print('It was at receiver node')
-    print(formatted)
     return {'formatted_commits':formatted}
 
 def extraction_node(state:AgentState):
@@ -82,8 +83,6 @@ def extraction_node(state:AgentState):
     extracted_commit = structured_llm.invoke(commit_prompt)
     extracted_commit = [add_time(file) for file in extracted_commit.model_dump()['repository']]
     print('It was at extraction node')
-    print(commit_prompt)
-    print(extracted_commit)
     return {'extracted_commits':extracted_commit}
 
 # ---- Graph Definition ----
@@ -95,3 +94,9 @@ builder.set_entry_point("receiver_node")
 builder.add_edge("receiver_node", "extraction_node")
 checkpointer = MemorySaver()
 graph = builder.compile(checkpointer=checkpointer)
+
+
+# i'm going to add a node that accumulate the extracted commit to a particular stuff, then upload it to a postgres db
+# then it will reset the extracted_commit state to an empty list
+# before each runs, i need it to generate a thread id using the date, so how will it know when to generate a thread id
+# it checks if the extracted_commit state is empty
