@@ -1,7 +1,6 @@
 from flask import Flask
 from config import Config
 import threading
-from app.agent_call.routes import ping_self
 def create_app(config_class=Config):    
     app = Flask(__name__)
     app.config.from_object(config_class)
