@@ -18,7 +18,7 @@ def ping_self():
             print("Pinged successfully")
         except Exception as e:
             print(f"Ping failed: {e}")
-        time.sleep(600)  # every 10 minutes
+        time.sleep(6000)  # every 10 minutes
 
 
 @bp.before_app_request
