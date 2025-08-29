@@ -12,8 +12,9 @@ from app.agent_call import bp
 
 
 
-@bp.route("/health")
+@bp.route("/health",methods=['GET'])
 def health_check():
+    print('Checking Health Status')
     return jsonify(status="ok")
 
 @bp.route("/agent", methods=["POST"])
