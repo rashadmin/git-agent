@@ -54,15 +54,9 @@ prompt_template = ChatPromptTemplate([('system',
     "addition of a file which is the filename or addition of some line of codes in the file, same for the removal and modification this is according"
     "to. Also we can also get the number of addition,deletion from the no of addition, deletion"
     "A commit message will be specified which describe what commit was made, a brief description about what the commit is about."
-    "The patch - is the main information body we will be using :"
-    "A patch is a text-based file that records the differences between two versions of code or documents. Instead of copying the entire new version, "
-    "it shows what changed: which lines were added, which were removed, and where in the file the changes occurred. Each section of a patch, called a hunk,"
-    " begins with a header (e.g., @@ -3,6 +3,7 @@) that indicates the line numbers in the old and new files. Lines starting with - represent deletions, lines "
-    "with + represent additions, and unchanged lines provide context. This structure allows information to be passed efficiently: anyone with the old file can "
-    "apply the patch and reconstruct the new version. Patches are widely used in version control systems like Git to share updates, review changes, or apply fixes"
-    " across codebases without replacing entire files. In essence, a patch is a compact set of instructions that describe how one version of a file transforms into another."
+    "The patch - is the main information body we will be using to get this information, "
     "Your job is to extract a list of key summary point of what happened in each patch given for each file. Make it detailed yet concise, that mean it should contain keywords"
-    "that can be used to generate a report about the changes that occured in this file."
+    "that can be used to generate a report about the changes that occured in this file. The below is the text string : "
                         ),
     ('human','{text_string}')])
 
