@@ -10,22 +10,7 @@ from app.agent_call import bp
 # listener_thread.start()
 
 
-def ping_self():
-    """Keep the app alive by pinging itself periodically."""
-    while True:
-        try:
-            requests.get("https://git-agent.onrender.com/health")
-            print("Pinged successfully")
-        except Exception as e:
-            print(f"Ping failed: {e}")
-        time.sleep(6)  # every 10 minutes
 
-
-# @bp.before_app_request
-# def activate_job():
-#     thread = threading.Thread(target=ping_self)
-#     thread.daemon = True
-#     thread.start()
 
 @bp.route("/health")
 def health_check():
