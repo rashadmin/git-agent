@@ -26,7 +26,8 @@ def run_agent():
     if event != "push":
         return jsonify({"msg": "Not a push event"}), 200
     data = request.json
-    config = {"configurable": {"thread_id": "5"}}
+    thread_id = int(datetime.combine(datetime.today().date(),datetime.min.time()).timestamp())
+    config = {"configurable": {"thread_id": thread_id}}
     graph.invoke({'commits':data},config=config)
     # user_input = data.get("message")
     # thread_id = data.get("thread_id", "default")
@@ -36,6 +37,15 @@ def run_agent():
 
     # result = graph.invoke({"requests": [], "last_id": "0"}, config=config)
     return 'hello world'
+    
+@bp.route("/compose", methods=["GET"])
+def compose_text():
+    previous_day_thread_id = int(datetime.combine(datetime.today().date(),datetime.min.time()).timestamp())
+    # previous_day_thread_id = int(datetime.combine((datetime.today().date()-timedelta(days=1)),datetime.min.time()).timestamp())
+    config = {"configurable": {"thread_id": previous_day_thread_id}}
+    state = print(graph.get_state(config=config))
+    return 'hello00000000000000000world'
+
     # return jsonify({
     #     "thread_id": thread_id,
     #     "response": result

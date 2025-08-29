@@ -2,10 +2,20 @@ from flask import Flask, request, jsonify
 from app.agent_call.graph import graph
 from app.agent_call.external import format_github_request
 import threading
+import time
+import requests
 from app.agent_call import bp
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
 # listener_thread.start()
+
+
+
+
+@bp.route("/health",methods=['GET'])
+def health_check():
+    print('Checking Health Status')
+    return jsonify(status="ok")
 
 @bp.route("/agent", methods=["POST"])
 # @app.route("/agent")
@@ -16,7 +26,8 @@ def run_agent():
     if event != "push":
         return jsonify({"msg": "Not a push event"}), 200
     data = request.json
-    config = {"configurable": {"thread_id": "5"}}
+    thread_id = int(datetime.combine(datetime.today().date(),datetime.min.time()).timestamp())
+    config = {"configurable": {"thread_id": thread_id}}
     graph.invoke({'commits':data},config=config)
     # user_input = data.get("message")
     # thread_id = data.get("thread_id", "default")
@@ -26,6 +37,15 @@ def run_agent():
 
     # result = graph.invoke({"requests": [], "last_id": "0"}, config=config)
     return 'hello world'
+    
+@bp.route("/compose", methods=["GET"])
+def compose_text():
+    previous_day_thread_id = int(datetime.combine(datetime.today().date(),datetime.min.time()).timestamp())
+    # previous_day_thread_id = int(datetime.combine((datetime.today().date()-timedelta(days=1)),datetime.min.time()).timestamp())
+    config = {"configurable": {"thread_id": previous_day_thread_id}}
+    state = print(graph.get_state(config=config))
+    return 'hello00000000000000000world'
+
     # return jsonify({
     #     "thread_id": thread_id,
     #     "response": result
