@@ -1,11 +1,13 @@
 from flask import Flask, request, jsonify
 from app.agent_call.graph import graph
-from app.agent_call.external import format_github_request
+from app.agent_call.external import format_github_request,text_composer
 import threading
 import time
 import requests
 from app.agent_call import bp
 from datetime import datetime,timedelta
+from langgraph.types import Command
+
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
 # listener_thread.start()
@@ -27,7 +29,7 @@ def run_agent():
     if event != "push":
         return jsonify({"msg": "Not a push event"}), 200
     data = request.json
-    thread_id = int(datetime.combine(datetime.today().date(),datetime.min.time()).timestamp())
+    thread_id = data['repository']['name'].encode("utf-8").hex()
     config = {"configurable": {"thread_id": thread_id}}
     graph.invoke({'commits':data},config=config)
     # user_input = data.get("message")
@@ -41,13 +43,13 @@ def run_agent():
     
 @bp.route("/compose", methods=["GET"])
 def compose_text():
-    previous_day_thread_id = int(datetime.combine(datetime.today().date(),datetime.min.time()).timestamp())
-    # previous_day_thread_id = int(datetime.combine((datetime.today().date()-timedelta(days=1)),datetime.min.time()).timestamp())
-    config = {"configurable": {"thread_id": previous_day_thread_id}}
-    state = graph.get_state(config=config)
-    print(state.values['extracted_commits'])
+    # compose for every commit for that day per repo by :
+    # we will query the db for the checkpointer to return all threads that was modified the previous day
+    threads = ['a','b']
+    for thread_id in threads:
+        text_composer(thread_id)
 
-    return state.values['extracted_commits']
+    # return state.values['extracted_commits']
 
     # return jsonify({
     #     "thread_id": thread_id,

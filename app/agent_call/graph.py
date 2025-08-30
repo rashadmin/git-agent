@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from langgraph.graph import StateGraph, END
 from langgraph.types import Command
 from langgraph.runtime import Runtime
-from app.agent_call.external import format_github_request
+from app.agent_call.external import format_github_request,get_all_commits
 from langgraph.checkpoint.memory import MemorySaver
 # import request
 import os
@@ -30,6 +30,7 @@ def add_time(file):
     return file
 
 class File(BaseModel):
+    commit_id:str = Field(description='The id of the particular commit we are using.')
     repo : str = Field(description='The Name of the repository ')
     filename : str = Field(description='The name of the file that changes is being made to')
     Patch : Optional[str] = Field(default=None,description='A list of the key points of the changes made as shown in the patch')
@@ -40,7 +41,7 @@ class Repository(BaseModel):
 @dataclass
 class AgentState(TypedDict):
     commits:str
-    formatted_commits:List[dict]
+    formatted_commits:Annotated[List[dict],add]
     extracted_commits:Annotated[List[dict],add]
     final_report:str
     # requests: Annotated[list[RequestEntry], add]
@@ -50,7 +51,7 @@ class AgentState(TypedDict):
 
 
 prompt_template = ChatPromptTemplate([('system',
-    "You will be given a text string containing the name of a repository , a filename on which the changes occurred, this changes could be"
+    "You will be given a text string containing the name of a repository, a commit id , a filename on which the changes occurred, this changes could be"
     "addition of a file which is the filename or addition of some line of codes in the file, same for the removal and modification this is according"
     "to. Also we can also get the number of addition,deletion from the no of addition, deletion"
     "A commit message will be specified which describe what commit was made, a brief description about what the commit is about."
@@ -60,13 +61,18 @@ prompt_template = ChatPromptTemplate([('system',
                         ),
     ('human','{text_string}')])
 
+#since formatted has a list of formatted commit with each commit id, we can
+#chck if the lenth of data is equal to len of formatted for that repository in the 
 
 
 
 
 def receiver_node(state:AgentState):
     payload = state['commits']
-    formatted = format_github_request(payload=payload)
+    if True:
+        formatted = get_all_commits(payload)
+    else:
+        formatted = format_github_request(payload=payload)
     print('It was at receiver node')
     return {'formatted_commits':formatted}
 
