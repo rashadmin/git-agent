@@ -76,19 +76,23 @@ def receiver_node(state:AgentState):
     else:
         formatted = format_github_request(payload=payload)['message']
     print('It was at receiver node')
+    print(formatted)
     return {'formatted_commits':formatted}
 
 def extraction_node(state:AgentState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     extracted_commits = []
+    print('could be here \n\n\n\n\n\')
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
     # a looop start#
     #i'm thinking  a date should be added to make composing text for each day easier for bulk composing
     commit_prompt = prompt_template.invoke({'text_string':state['formatted_commits']})#change from state to df slice
+    print('Im here\n\n\n\n\n\n')
     structured_llm = llm.with_structured_output(schema=Repository)
     extracted_commit = structured_llm.invoke(commit_prompt)
+    print('Im now here \n\n\n\n\n\n')
     extracted_commit = [add_time(file) for file in extracted_commit.model_dump()['repository']]
     extracted_commits.extend(extracted_commit)
         # a looop end#
