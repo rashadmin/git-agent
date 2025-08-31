@@ -7,7 +7,7 @@ from app.agent_call.external import format_github_request,get_all_commits
 from langgraph.checkpoint.memory import MemorySaver
 # import request
 from psycopg_pool import ConnectionPool
-from langgraph.checkpoint.postgres import PostgresCheckpointer
+# from langgraph.checkpoint.postgres import PostgresCheckpointer
 import os
 from langchain_core.prompts import ChatPromptTemplate
 from flask import jsonify,current_app
