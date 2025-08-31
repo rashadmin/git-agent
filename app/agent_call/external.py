@@ -10,6 +10,9 @@ def commit_update(commit,commit_message,repo,commit_id):
     f"{commit['additions']}, No of Deletion - {commit['deletions']}, Commit Message - {commit['message']}, Patch - {commit.get('patch',None)}")
     return message
 
+def add_date(commit_date,commit):
+    return  {'commit_date':commit_date,'message':commit }
+
 def format_github_request(repo,after_commit):
     
     GITHUB_TOKEN = current_app.config['GITHUB_TOKEN']
@@ -21,11 +24,14 @@ def format_github_request(repo,after_commit):
     if r.status_code == 200:
         data = r.json()
         commit_id = data['sha']
+        #COMMIT DATE CREATED
+        commit_date=None
         commit_message = data['commit']['message']
         commits = data['files']#[1]#['patch']
         changed_files = [commit_update(commit,commit_message,repo,commit_id) for commit in commits if (commit['filename'].find('/lib/') < 0 and  \
                         commit['filename'].find('/bin/') < 0 and commit['filename'].find('ipynb_checkpoints/') < 0)]
         changed_files = [f'No({index+1}) {commit}' for index,commit in enumerate(changed_files)]
+        changed_files = [add_date(commit_date,commit) for commit in changed_files]
         return changed_files
     else:
         return jsonify({"error": f"Failed to fetch commit: {r.status_code}"}), 500
@@ -45,6 +51,8 @@ def get_all_commits(payload):
     else:
         data = []
     formatted = [format_github_request(repo,commit['sha']) for commit in data]
+    #receiving a nested list of dictionary, flatten  to a list of dictionary
+    #convert to data frame, and sort by date, convert to list of dictionary and return as formatted 
     return formatted
 
 def text_composer(thread_id):

@@ -13,6 +13,7 @@ from langchain.chat_models import init_chat_model
 import os
 from pydantic import BaseModel,Field
 from typing import Optional,List,Set
+from langgraph.checkpoint.postgres import PostgresSaver
 
 
 
@@ -66,35 +67,47 @@ prompt_template = ChatPromptTemplate([('system',
 
 
 
+DB_URI = "postgresql://git_agent_db_user:Jg8FAmsZRmRNWPsSowBFfNTCD40bwQ4S@dpg-d2q621f5r7bs73abgs6g-a.oregon-postgres.render.com/git_agent_db"
+with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
+    checkpointer.setup()
 
-def receiver_node(state:AgentState):
-    payload = state['commits']
-    if True:
-        formatted = get_all_commits(payload)
-    else:
-        formatted = format_github_request(payload=payload)
-    print('It was at receiver node')
-    return {'formatted_commits':formatted}
+    def receiver_node(state:AgentState):
+        payload = state['commits']
+        if True:
+            formatted = get_all_commits(payload)
+        else:
+            formatted = format_github_request(payload=payload)['message']
+        print('It was at receiver node')
+        return {'formatted_commits':formatted}
 
-def extraction_node(state:AgentState):
-    os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
-    llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
-    commit_prompt = prompt_template.invoke({'text_string':state['formatted_commits']})
-    structured_llm = llm.with_structured_output(schema=Repository)
-    extracted_commit = structured_llm.invoke(commit_prompt)
-    extracted_commit = [add_time(file) for file in extracted_commit.model_dump()['repository']]
-    print('It was at extraction node')
-    return {'extracted_commits':extracted_commit}
+    def extraction_node(state:AgentState):
+        os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
+        llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
+        extracted_commits = []
+        # extract all the date in formatted using pandas
+        # slice through df for each date, using each date run the extract and extend the extracted_commit list
+        # a looop start#
+        #i'm thinking  a date should be added to make composing text for each day easier for bulk composing
+        commit_prompt = prompt_template.invoke({'text_string':state['formatted_commits']})#change from state to df slice
+        structured_llm = llm.with_structured_output(schema=Repository)
+        extracted_commit = structured_llm.invoke(commit_prompt)
+        extracted_commit = [add_time(file) for file in extracted_commit.model_dump()['repository']]
+        extracted_commits.extend(extracted_commit)
+            # a looop end#
+        print('It was at extraction node')
+        return {'extracted_commits':extracted_commit}
 
-# ---- Graph Definition ----
-builder = StateGraph(AgentState)
-builder.add_node(receiver_node)
-builder.add_node(extraction_node)
-# builder.add_node("responder", responder)
-builder.set_entry_point("receiver_node")
-builder.add_edge("receiver_node", "extraction_node")
-checkpointer = MemorySaver()
-graph = builder.compile(checkpointer=checkpointer)
+    # ---- Graph Definition ----
+    builder = StateGraph(AgentState)
+    builder.add_node(receiver_node)
+    builder.add_node(extraction_node)
+    # builder.add_node("responder", responder)
+    builder.set_entry_point("receiver_node")
+    builder.add_edge("receiver_node", "extraction_node")
+
+
+    # we will be adding a postgresql checkpointer
+    graph = builder.compile(checkpointer=checkpointer)
 
 
 # i'm going to add a node that accumulate the extracted commit to a particular stuff, then upload it to a postgres db
