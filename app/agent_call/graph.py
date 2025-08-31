@@ -69,7 +69,7 @@ prompt_template = ChatPromptTemplate([('system',
 
 DB_URI = "postgresql://git_agent_db_user:Jg8FAmsZRmRNWPsSowBFfNTCD40bwQ4S@dpg-d2q621f5r7bs73abgs6g-a.oregon-postgres.render.com/git_agent_db"
 with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
-    checkpointer.setup()
+    # checkpointer.setup()
 
     def receiver_node(state:AgentState):
         payload = state['commits']
