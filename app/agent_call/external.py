@@ -1,7 +1,7 @@
 import requests
 from flask import jsonify,request,current_app
 from langchain_core.prompts import ChatPromptTemplate
-from app.agent_call.graph import graph
+# from app.agent_call.graph import graph
 from langgraph.types import Command
 
 def commit_update(commit,commit_message,repo,commit_id):
@@ -64,8 +64,9 @@ def text_composer(thread_id):
 
                         ),
     ('human','{extracted_commit}')])
-    
-    config = {"configurable": {"thread_id": thread_id}}
-    extracted_commits = graph.get_state(config=config).values['extracted_commits']
+    pass
+    # config = {"configurable": {"thread_id": thread_id}}
+
+    # extracted_commits = graph.get_state(config=config).values['extracted_commits']
     # composed_text = text_composer(extracted_commits)
-    Command(graph,update= {'composed_text':composed_text})
+    # Command(graph,update= {'composed_text':composed_text})
