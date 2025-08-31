@@ -68,11 +68,11 @@ prompt_template = ChatPromptTemplate([('system',
 #chck if the lenth of data is equal to len of formatted for that repository in the 
 
 
-
-DB_URI = "postgresql://git_agent_db_user:Jg8FAmsZRmRNWPsSowBFfNTCD40bwQ4S@dpg-d2q621f5r7bs73abgs6g-a.oregon-postgres.render.com/git_agent_db"
-pool = ConnectionPool(conninfo=DB_URI)
+# postgresql://git_agent_db_user:Jg8FAmsZRmRNWPsSowBFfNTCD40bwQ4S@dpg-d2q621f5r7bs73abgs6g-a/git_agent_db
+DB_URI = "postgresql://git_agent_db_user:Jg8FAmsZRmRNWPsSowBFfNTCD40bwQ4S@dpg-d2q621f5r7bs73abgs6g-a/git_agent_db"
+# pool = ConnectionPool(conninfo=DB_URI)
 # checkpointer = PostgresCheckpointer(pool)
-with PostgresSaver.from_conn_string(pool) as checkpointer:
+with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
     # checkpointer.setup()
 
     def receiver_node(state:AgentState):
