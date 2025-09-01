@@ -82,7 +82,7 @@ def text_composer(thread_id):
         compiled_diary = llm.invoke(patch_prompt)
         df[df['date']==date]['compiled'].replace(False,True,inplace=True)
         extracted_commits = df.to_dict(orient='records')
-        Command(graph,update={'extracted_commits':extracted_commits})
+        Command(update={'extracted_commits':extracted_commits})
         print(compiled_diary)
     # config = {"configurable": {"thread_id": thread_id}}
 
