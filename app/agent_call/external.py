@@ -33,8 +33,7 @@ def format_github_request(repo,after_commit):
         changed_files = [f'No({index+1}) {commit}' for index,commit in enumerate(changed_files)]
         changed_files = [add_date(commit_date,commit) for commit in changed_files]
         return changed_files
-    else:
-        return jsonify({"error": f"Failed to fetch commit: {r.status_code}"}), 500
+
     
 
 def get_all_commits(payload):
