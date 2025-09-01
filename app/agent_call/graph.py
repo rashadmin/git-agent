@@ -43,7 +43,7 @@ class File(BaseModel):
 class Repository(BaseModel):
     repository:List[File]
 
-@dataclass
+
 class AgentState(TypedDict):
     commits:str
     formatted_commits:Annotated[List[dict],add]
@@ -86,7 +86,6 @@ def extraction_node(state:AgentState):
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     extracted_commits = []
     print('could be here \n\n\n\n\n\n')
-    state
     df = pd.DataFrame().from_records(state['formatted_commits'])
     df['commit_date'] = pd.to_datetime(df['commit_date'])
     df.sort_values('commit_date',inplace=True)
@@ -112,7 +111,7 @@ def extraction_node(state:AgentState):
     print('Im now here \n\n\n\n\n\n')
         # a looop end#
     print('It was at extraction node')
-    return {'extracted_commits':extracted_commit}
+    return {'extracted_commits':extracted_commits}
 
 # ---- Graph Definition ----
 builder = StateGraph(AgentState)
@@ -121,7 +120,7 @@ builder.add_node(extraction_node)
 # builder.add_node("responder", responder)
 builder.set_entry_point("receiver_node")
 builder.add_edge("receiver_node", "extraction_node")
-
+builder.add_edge("extraction_node",END)
 
 # we will be adding a postgresql checkpointer
 graph = builder.compile(checkpointer=checkpointer)
