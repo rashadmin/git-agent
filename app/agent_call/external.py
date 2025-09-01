@@ -25,7 +25,7 @@ def format_github_request(repo,after_commit):
         data = r.json()
         commit_id = data['sha']
         #COMMIT DATE CREATED
-        commit_date=None
+        commit_date=data['commit']['committer']['date']
         commit_message = data['commit']['message']
         commits = data['files']#[1]#['patch']
         changed_files = [commit_update(commit,commit_message,repo,commit_id) for commit in commits if (commit['filename'].find('/lib/') < 0 and  \

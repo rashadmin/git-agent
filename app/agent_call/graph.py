@@ -7,6 +7,8 @@ from app.agent_call.external import format_github_request,get_all_commits
 from langgraph.checkpoint.memory import MemorySaver
 # import request
 from psycopg_pool import ConnectionPool
+import numpy as np
+import pandas as pd
 from app.extensions import checkpointer
 # from langgraph.checkpoint.postgres import PostgresCheckpointer
 import os
@@ -28,9 +30,8 @@ def add(left, right):
 
 
 from datetime import datetime
-def add_time(file):
-    timestamp = datetime.now()
-    file.update({'timestamp':timestamp})
+def add_date(date,file):
+    file.update({'date':date})
     return file
 
 class File(BaseModel):
@@ -77,24 +78,38 @@ def receiver_node(state:AgentState):
         formatted = format_github_request(payload=payload)['message']
     print('It was at receiver node')
     print(formatted)
-    return {'formatted_commits':formatted}
+    formatted = np.array(formatted).flatten()
+    return {'formatted_commits':formatted.tolist()}
 
 def extraction_node(state:AgentState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     extracted_commits = []
     print('could be here \n\n\n\n\n\n')
+    state
+    df = pd.DataFrame().from_records(state['formatted_commits'])
+    df['commit_date'] = pd.to_commit_datetime(df['commit_date'])
+    df.sort_values('commit_date',inplace=True)
+    df['dayofyear'] = df['commit_date'].dt.dayofyear.astype(str)
+    df['year'] = df['commit_date'].dt.year.astype(str)
+    df['day'] = df['year']+'-'+df['dayofyear']
+    df.drop(['dayofyear','year'],axis=1,inplace=True)
+    unique_commit_date = df['day'].unique()
+    for date in unique_commit_date:
+        temp = df[df['day']==date]
+        temp_message = temp['message']
+        # temp_date = temp['commit_date'].dt.dayofyear
+        commit_prompt = prompt_template.invoke({'text_string':temp_message.tolist()})#change from state to df slice
+        print('Im here\n\n\n\n\n\n')
+        structured_llm = llm.with_structured_output(schema=Repository)
+        extracted_commit = structured_llm.invoke(commit_prompt)
+        extracted_commit = [add_date(date,file) for file in extracted_commit.model_dump()['repository']]
+        extracted_commits.extend(extracted_commit)
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
     # a looop start#
     #i'm thinking  a date should be added to make composing text for each day easier for bulk composing
-    commit_prompt = prompt_template.invoke({'text_string':state['formatted_commits']})#change from state to df slice
-    print('Im here\n\n\n\n\n\n')
-    structured_llm = llm.with_structured_output(schema=Repository)
-    extracted_commit = structured_llm.invoke(commit_prompt)
     print('Im now here \n\n\n\n\n\n')
-    extracted_commit = [add_time(file) for file in extracted_commit.model_dump()['repository']]
-    extracted_commits.extend(extracted_commit)
         # a looop end#
     print('It was at extraction node')
     return {'extracted_commits':extracted_commit}
