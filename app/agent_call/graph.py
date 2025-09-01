@@ -9,7 +9,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from psycopg_pool import ConnectionPool
 import numpy as np
 import pandas as pd
-from app.extensions import checkpointer
+from app.extensions import checkpointer,conn
 # from langgraph.checkpoint.postgres import PostgresCheckpointer
 import os
 from langchain_core.prompts import ChatPromptTemplate
@@ -31,7 +31,7 @@ def add(left, right):
 
 from datetime import datetime
 def add_date(date,file):
-    file.update({'date':date})
+    file.update({'date':date,'compiled':False})
     return file
 
 class File(BaseModel):
@@ -51,7 +51,6 @@ class AgentState(TypedDict):
     final_report:str
     # requests: Annotated[list[RequestEntry], add]
     # selected_request: Optional[int] = None
-
 
 
 

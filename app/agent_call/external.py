@@ -1,8 +1,12 @@
 import requests
 from flask import jsonify,request,current_app
 from langchain_core.prompts import ChatPromptTemplate
-# from app.agent_call.graph import graph
+from app.agent_call.graph import graph
 from langgraph.types import Command
+import pandas as pd
+import os
+from langchain.chat_models import init_chat_model
+
 
 def commit_update(commit,commit_message,repo,commit_id):
     commit.update({'message':commit_message,'repo_name':repo.split('/')[-1],'commit_id':commit_id})
@@ -56,14 +60,30 @@ def get_all_commits(payload):
 
 def text_composer(thread_id):
     prompt_template = ChatPromptTemplate([('system',
-    "You will be given a serialized json string containing a list of dictionary.Each dictionary contain : `a timestamp, a patch which contains description of what happened in the updated code"
-    "A filename which is the file the changed occured, the repository the file is located. ` "
+    "You will be given a list of strings.Each string contain : `a patch which contains description of what happened in the updated code"
+    "A filename which is the file the changed occured` "
     "I want you to create a diary post that will talk about the changes that occured throughout the series of the timeline represented as the timestamp in the serialized json string"
-    "E.g A line of code might have been added in a previous timestamp, if the new patch in current timestamp indicates that the line was remove or changed, kindly indicate it, let it be shown as a story timeline"
+    "E.g A line of code might have been added in a previous index of the list, if the new patch in current timestamp indicates that the line was remove or changed, kindly indicate it, let it be shown as a story timeline"
 
                         ),
-    ('human','{extracted_commit}')])
-    pass
+    ('human','{patch}')])
+    os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
+    llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
+    config = {"configurable": {"thread_id": thread_id}}
+    state = graph.get_state(config=config).values
+    df = pd.DataFrame().from_records(state['extracted_commits'])
+    uncompiled_df = df[df['compiled']==False]
+    unique_date = uncompiled_df['date'].unique()
+    for date in unique_date:
+        temp_df = uncompiled_df[uncompiled_df['date']==date]
+        temp_df['file_patch'] = 'FileName : ' + temp_df['filename'] + 'Patch : ' + temp_df['Patch']
+        patch = temp_df['file_patch'].tolist()
+        patch_prompt = prompt_template.invoke({'patch':patch})#change from state to df slice
+        compiled_diary = llm.invoke(patch_prompt)
+        df[df['date']==date]['compiled'].replace(False,True,inplace=True)
+        extracted_commits = df.to_dict(orient='records')
+        Command(graph,update={'extracted_commits':extracted_commits})
+        print(compiled_diary)
     # config = {"configurable": {"thread_id": thread_id}}
 
     # extracted_commits = graph.get_state(config=config).values['extracted_commits']
