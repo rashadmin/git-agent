@@ -110,6 +110,7 @@ def extraction_node(state:AgentState):
     #i'm thinking  a date should be added to make composing text for each day easier for bulk composing
     print('Im now here \n\n\n\n\n\n')
         # a looop end#
+    print("Checkpointer type:", type(checkpointer))
     print('It was at extraction node')
     return {'extracted_commits':extracted_commits}
 
@@ -125,7 +126,7 @@ builder.add_edge("extraction_node",END)
 # we will be adding a postgresql checkpointer
 graph = builder.compile(checkpointer=checkpointer)
 
-
+print("Checkpointer type:", type(checkpointer))
 # i'm going to add a node that accumulate the extracted commit to a particular stuff, then upload it to a postgres db
 # then it will reset the extracted_commit state to an empty list
 # before each runs, i need it to generate a thread id using the date, so how will it know when to generate a thread id
