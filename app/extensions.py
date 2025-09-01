@@ -6,4 +6,4 @@ DB_URI = "postgresql://git_agent_db_user:Jg8FAmsZRmRNWPsSowBFfNTCD40bwQ4S@dpg-d2
 conn = psycopg.connect(DB_URI)
 
 checkpointer = PostgresSaver(conn)
-checkpointer.setup()  # make sure schema exists
+# checkpointer.setup()  # make sure schema exists
