@@ -78,8 +78,8 @@ def receiver_node(state:AgentState):
         formatted = format_github_request(payload=payload)['message']
     print('It was at receiver node')
     print(formatted)
-    formatted = np.array(formatted).flatten()
-    return {'formatted_commits':formatted.tolist()}
+    formatted = [item for sublist in formatted for item in sublist]
+    return {'formatted_commits':formatted}
 
 def extraction_node(state:AgentState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
