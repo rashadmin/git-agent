@@ -1,7 +1,6 @@
 import requests
 from flask import jsonify,request,current_app
 from langchain_core.prompts import ChatPromptTemplate
-from app.agent_call.graph import graph
 from langgraph.types import Command
 import pandas as pd
 import os
@@ -59,6 +58,7 @@ def get_all_commits(payload):
     return formatted
 
 def text_composer(thread_id):
+    from app.agent_call.graph import graph
     prompt_template = ChatPromptTemplate([('system',
     "You will be given a list of strings.Each string contain : `a patch which contains description of what happened in the updated code"
     "A filename which is the file the changed occured` "
