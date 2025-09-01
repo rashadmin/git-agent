@@ -88,7 +88,7 @@ def extraction_node(state:AgentState):
     print('could be here \n\n\n\n\n\n')
     state
     df = pd.DataFrame().from_records(state['formatted_commits'])
-    df['commit_date'] = pd.to_commit_datetime(df['commit_date'])
+    df['commit_date'] = pd.to_datetime(df['commit_date'])
     df.sort_values('commit_date',inplace=True)
     df['dayofyear'] = df['commit_date'].dt.dayofyear.astype(str)
     df['year'] = df['commit_date'].dt.year.astype(str)
