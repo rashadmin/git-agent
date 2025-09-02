@@ -96,7 +96,8 @@ def text_composer(thread_id):
         df[df['date']==date]['compiled'].replace(False,True,inplace=True)
         extracted_commits = df.to_dict(orient='records')
         Command(update={'extracted_commits':extracted_commits})
-        print(compiled_diary)
+        info = {'compiled_diary':compiled_diary,'repo':bytes.fromhex(thread_id),'date':date}
+        return info
     # config = {"configurable": {"thread_id": thread_id}}
 
     # extracted_commits = graph.get_state(config=config).values['extracted_commits']
