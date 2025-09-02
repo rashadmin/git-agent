@@ -9,7 +9,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from psycopg_pool import ConnectionPool
 import numpy as np
 import pandas as pd
-from app.extensions import checkpointer,conn
+from app.extensions import checkpointer
 # from langgraph.checkpoint.postgres import PostgresCheckpointer
 import os
 from langchain_core.prompts import ChatPromptTemplate
