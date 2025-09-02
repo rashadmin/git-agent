@@ -8,4 +8,4 @@ pool = ConnectionPool(DB_URI, min_size=1, max_size=5, max_lifetime=1800)
 
 conn = pool.connection()
 checkpointer = PostgresSaver(DB_URI)
-# checkpointer.setup()  # make sure schema exists
+checkpointer.setup()  # make sure schema exists

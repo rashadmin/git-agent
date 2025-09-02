@@ -15,6 +15,15 @@ from app.extensions import pool
 # listener_thread.start()
 
 
+def get_checkpoints():
+    with pool.connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT thread_id, checkpoint_id, checkpoint
+                FROM checkpoints
+                ORDER BY checkpoint_id DESC
+            """
+            return cur.fetchall()
 
 
 @bp.route("/health",methods=['GET'])
@@ -46,23 +55,14 @@ def run_agent():
 @bp.route("/compose", methods=["GET"])
 def compose_text():
     printer = []
-    with pool.connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT thread_id, checkpoint_id, checkpoint
-                FROM checkpoints
-                ORDER BY checkpoint_id DESC
-            """)
-            rows = cur.fetchall()
-            today_thread_id = {row[0] for row in rows if datetime.fromisoformat(row[2]['ts']).date() == datetime.now().date()}
-            # compose for every commit for that day per repo by :
-            # we will query the db for the checkpointer to return all threads that was modified the previous day
-            for thread_id in today_thread_id:
-                printer.extend(text_composer(thread_id))
+    rows = get_checkpoints(limit=10)
+    today_thread_id = {row[0] for row in rows if datetime.fromisoformat(row[2]['ts']).date() == datetime.now().date()}
+    # compose for every commit for that day per repo by :
+    # we will query the db for the checkpointer to return all threads that was modified the previous day
+    for thread_id in today_thread_id:
+        printer.extend(text_composer(thread_id))
 
-        # commit only if you modify data
-        conn.commit()
-    
+        # commit only if you modify da    
     return printer
     # return state.values['extracted_commits']
 
