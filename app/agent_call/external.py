@@ -90,11 +90,14 @@ def text_composer(thread_id):
     compiled_diary_list = []
     for date in unique_date:
         temp_df = uncompiled_df[uncompiled_df['date']==date]
+        print(temp_df['compiled'].value_counts())
+        print(temp_df.head())
         temp_df['file_patch'] = 'FileName : ' + temp_df['filename'] + 'Patch : ' + temp_df['Patch']
         patch = temp_df['file_patch'].tolist()
         patch_prompt = prompt_template.invoke({'patch':patch})#change from state to df slice
         compiled_diary = llm.invoke(patch_prompt)
         df.loc[df['date']==date,'compiled'] = True
+        print(temp_df['compiled'].value_counts())
         extracted_commits = df.to_dict(orient='records')
         Command(update={'extracted_commits':extracted_commits})
         info = {'compiled_diary':compiled_diary,'repo':bytes.fromhex(thread_id),'date':date}
