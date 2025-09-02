@@ -87,6 +87,7 @@ def text_composer(thread_id):
     df = pd.DataFrame().from_records(state['extracted_commits'])
     uncompiled_df = df[df['compiled']==False]
     unique_date = uncompiled_df['date'].unique()
+    compiled_diary_list = []
     for date in unique_date:
         temp_df = uncompiled_df[uncompiled_df['date']==date]
         temp_df['file_patch'] = 'FileName : ' + temp_df['filename'] + 'Patch : ' + temp_df['Patch']
@@ -97,9 +98,10 @@ def text_composer(thread_id):
         extracted_commits = df.to_dict(orient='records')
         Command(update={'extracted_commits':extracted_commits})
         info = {'compiled_diary':compiled_diary,'repo':bytes.fromhex(thread_id),'date':date}
+        compiled_diary_list.extend(info)
         print(info)
         print('\n\n\n\n\n\n\n\n\n\n\n')
-        return info
+    return compiled_diary_list
     # config = {"configurable": {"thread_id": thread_id}}
 
     # extracted_commits = graph.get_state(config=config).values['extracted_commits']
