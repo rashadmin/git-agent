@@ -7,7 +7,7 @@ import requests
 from app.agent_call import bp
 from datetime import datetime,timedelta
 from langgraph.types import Command
-from app.extensions import checkpointer,conn,pool
+from app.extensions import pool
 
 
 # Start listener thread when app launches

@@ -1,9 +1,9 @@
 from app import create_app
 from app.agent_call.graph import graph
-from app.extensions import checkpointer,conn
+from app.extensions import checkpointer,conn,pool
 
 app = create_app()
 
 @app.shell_context_processor
 def make_shell_context():
-    return {'graph':graph,'check':conn}
+    return {'graph':graph,'pool':pool}
