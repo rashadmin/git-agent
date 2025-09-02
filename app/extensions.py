@@ -7,5 +7,5 @@ DB_URI = "postgresql://git_agent_db_xocq_user:HRsa5HU2jL4y52lml80ZsmvG6dsjhlBF@d
 pool = ConnectionPool(DB_URI, min_size=1, max_size=5, max_lifetime=1800)
 
 conn = pool.connection()
-checkpointer = PostgresSaver(DB_URI)
-checkpointer.setup()  # make sure schema exists
+checkpointer = PostgresSaver(conn)
+# checkpointer.setup()  # make sure schema exists
