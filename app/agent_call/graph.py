@@ -48,7 +48,7 @@ class AgentState(TypedDict):
     commits:str
     formatted_commits:Annotated[List[dict],add]
     extracted_commits:Annotated[List[dict],add]
-    final_report:str
+    final_report:Annotated[List[dict],add]
     # requests: Annotated[list[RequestEntry], add]
     # selected_request: Optional[int] = None
 

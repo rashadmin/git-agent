@@ -53,8 +53,8 @@ def compose_text():
     # compose for every commit for that day per repo by :
     # we will query the db for the checkpointer to return all threads that was modified the previous day
     for thread_id in today_thread_id:
-        printer.extend(text_composer(thread_id))
-    return jsonify({'values':printer})
+        text_composer(thread_id)
+    return 'DONE'
     # return state.values['extracted_commits']
 
     # return jsonify({
