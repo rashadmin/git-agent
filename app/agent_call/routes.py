@@ -22,7 +22,7 @@ def get_checkpoints():
                 SELECT thread_id, checkpoint_id, checkpoint
                 FROM checkpoints
                 ORDER BY checkpoint_id DESC
-            """
+            """)
             return cur.fetchall()
 
 
