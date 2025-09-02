@@ -97,6 +97,8 @@ def text_composer(thread_id):
         extracted_commits = df.to_dict(orient='records')
         Command(update={'extracted_commits':extracted_commits})
         info = {'compiled_diary':compiled_diary,'repo':bytes.fromhex(thread_id),'date':date}
+        print(info)
+        print('\n\n\n\n\n\n\n\n\n\n\n')
         return info
     # config = {"configurable": {"thread_id": thread_id}}
 
