@@ -66,15 +66,12 @@ prompt_template = ChatPromptTemplate([('system',
     ('human','{text_string}')])
 
 #since formatted has a list of formatted commit with each commit id, we can
-#chck if the lenth of data is equal to len of formatted for that repository in the 
+#chck if the lenth of data is equal to len of formatted for that repository in the checkpointer
 
 
 def receiver_node(state:AgentState):
     payload = state['commits']
-    if True:
-        formatted = get_all_commits(payload)
-    else:
-        formatted = format_github_request(payload=payload)['message']
+    formatted = get_all_commits(payload)
     print('It was at receiver node')
     # print(formatted)
     formatted = [item for sublist in formatted for item in sublist]

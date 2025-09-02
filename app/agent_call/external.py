@@ -3,6 +3,7 @@ from flask import jsonify,request,current_app
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.types import Command
 import pandas as pd
+# from app.agent_call.graph import graph
 import os
 from langchain.chat_models import init_chat_model
 
@@ -17,7 +18,6 @@ def add_date(commit_date,commit):
     return  {'commit_date':commit_date,'message':commit }
 
 def format_github_request(repo,after_commit):
-    
     GITHUB_TOKEN = current_app.config['GITHUB_TOKEN']
     GITHUB_API_URL = "https://api.github.com"      
     headers = {"Authorization": f"token {GITHUB_TOKEN}","Accept": "application/vnd.github.v3+json"}
@@ -40,8 +40,9 @@ def format_github_request(repo,after_commit):
     
 
 def get_all_commits(payload):
+    from app.agent_call.graph import graph
     repo = payload["repository"]["full_name"]   
-    # after_commit = 'c86c53676c1a2490681880f69fcfade90a9b87a3'#payload["after"]            
+    after_commit = payload["after"]            
     GITHUB_API_URL = "https://api.github.com"
     GITHUB_TOKEN = current_app.config['GITHUB_TOKEN']
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
@@ -52,7 +53,19 @@ def get_all_commits(payload):
         data = r.json()
     else:
         data = []
-    formatted = [format_github_request(repo,commit['sha']) for commit in data]
+    thread_id = payload['repository']['name'].encode("utf-8").hex()
+    config = {"configurable": {"thread_id": thread_id}}
+    state = graph.get_state(config=config).values
+    extracted_commit = {i['commit_id'] for i in state['extracted_commits']}
+    if len(data)-1==len(extracted_commit):
+        formatted = format_github_request(repo,after_commit)
+        print
+    elif len(data)==len(extracted_commit):
+        formatted=[]
+    else:
+        commit_ids = {commit['sha'] for commit in data}
+        commit_ids.difference_update(extracted_commit)
+        formatted = [format_github_request(repo,commit) for commit in commit_ids]
     #receiving a nested list of dictionary, flatten  to a list of dictionary
     #convert to data frame, and sort by date, convert to list of dictionary and return as formatted 
     return formatted
