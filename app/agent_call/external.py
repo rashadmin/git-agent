@@ -94,7 +94,7 @@ def text_composer(thread_id):
         patch = temp_df['file_patch'].tolist()
         patch_prompt = prompt_template.invoke({'patch':patch})#change from state to df slice
         compiled_diary = llm.invoke(patch_prompt)
-        df[df['date']==date,'compiled'] = True
+        df.loc[df['date']==date,'compiled'] = True
         extracted_commits = df.to_dict(orient='records')
         Command(update={'extracted_commits':extracted_commits})
         info = {'compiled_diary':compiled_diary,'repo':bytes.fromhex(thread_id),'date':date}
