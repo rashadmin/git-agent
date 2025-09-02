@@ -28,6 +28,20 @@ def add(left, right):
     left.extend(right)
     return left
 
+def adder(left,right):
+    df = pd.DataFrame().from_records(left)
+    df_updates = pd.DataFrame().from_records(right)
+    # Merge with updates (outer join keeps everything)
+    df = df.merge(df_updates, on=["commit_id", "file_path"], how="outer", suffixes=("", "_new"))
+
+    # If compiled_new exists, prefer it, else keep old compiled
+    df["compiled"] = df["compiled_new"].combine_first(df["compiled"])
+
+    # Drop the helper column
+    df = df.drop(columns=["compiled_new"])
+    left = df.to_dict(orient='records')
+    return left
+    
 
 from datetime import datetime
 def add_date(date,file):
@@ -47,7 +61,7 @@ class Repository(BaseModel):
 class AgentState(TypedDict):
     commits:str
     formatted_commits:Annotated[List[dict],add]
-    extracted_commits:Annotated[List[dict],add]
+    extracted_commits:Annotated[List[dict],adder]
     compiled_diary_list:Annotated[List[dict],add]
     # requests: Annotated[list[RequestEntry], add]
     # selected_request: Optional[int] = None

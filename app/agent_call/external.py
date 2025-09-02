@@ -3,6 +3,7 @@ from flask import jsonify,request,current_app
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.types import Command
 import pandas as pd
+from app.extensions import checkpointer
 # from app.agent_call.graph import graph
 import os
 from langchain.chat_models import init_chat_model
@@ -99,11 +100,12 @@ def text_composer(thread_id):
         df.loc[df['date']==date,'compiled'] = True
         print(temp_df['compiled'].value_counts())
         info = {'compiled_diary':compiled_diary.content,'repo':bytes.fromhex(thread_id).decode("utf-8"),'date':date}
-        compiled_diary_list.extend(info)
+        extracted_commits = df.to_dict(orient='records')
+        checkpointer.put({"configurable": {"thread_id": thread_id}},
+                         Command(update={'extracted_commits':extracted_commits,'compiled_diary_list':info}))
         print(info)
         print('\n\n\n\n\n\n\n\n\n\n\n')
-    extracted_commits = df.to_dict(orient='records')
-    return Command(update={'extracted_commits':extracted_commits,'compiled_diary_list':compiled_diary_list})
+    
     # config = {"configurable": {"thread_id": thread_id}}
 
     # extracted_commits = graph.get_state(config=config).values['extracted_commits']
