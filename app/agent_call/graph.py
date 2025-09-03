@@ -29,6 +29,9 @@ def add(left, right):
     return left
 
 def adder(left,right):
+    if len(left)==0:
+        left.extend(right)
+        return left
     df = pd.DataFrame().from_records(left)
     df_updates = pd.DataFrame().from_records(right)
     # Merge with updates (outer join keeps everything)
