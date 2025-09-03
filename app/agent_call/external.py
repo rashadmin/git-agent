@@ -102,7 +102,8 @@ def text_composer(thread_id):
         info = {'compiled_diary':compiled_diary.content,'repo':bytes.fromhex(thread_id).decode("utf-8"),'date':date}
         extracted_commits = df.to_dict(orient='records')
         checkpointer.put({"configurable": {"thread_id": thread_id}},
-                         Command(update={'extracted_commits':extracted_commits,'compiled_diary_list':info}))
+                         Command(update={'extracted_commits':extracted_commits,'compiled_diary_list':info}),
+                         {},[])
         print(info)
         print('\n\n\n\n\n\n\n\n\n\n\n')
     
