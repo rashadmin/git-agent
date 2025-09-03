@@ -35,7 +35,7 @@ def adder(left,right):
     df = pd.DataFrame().from_records(left)
     df_updates = pd.DataFrame().from_records(right)
     # Merge with updates (outer join keeps everything)
-    df = df.merge(df_updates, on=["commit_id", "file_path"], how="outer", suffixes=("", "_new"))
+    df = df.merge(df_updates, on=["commit_id", "filename"], how="outer", suffixes=("", "_new"))
 
     # If compiled_new exists, prefer it, else keep old compiled
     df["compiled"] = df["compiled_new"].combine_first(df["compiled"])
