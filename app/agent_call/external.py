@@ -88,6 +88,7 @@ def text_composer(thread_id):
     df = pd.DataFrame().from_records(state['extracted_commits'])
     uncompiled_df = df[df['compiled']==False]
     unique_date = uncompiled_df['date'].unique()
+    print(df['compiled'].value_counts())
     compiled_diary_list = []
     for date in unique_date:
         temp_df = uncompiled_df[uncompiled_df['date']==date]
