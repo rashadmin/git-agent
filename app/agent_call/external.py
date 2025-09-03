@@ -104,8 +104,7 @@ def text_composer(thread_id):
         extracted_commits = df.to_dict(orient='records')
         graph.update_state(
         {"configurable": {"thread_id": thread_id}},
-        {'extracted_commits':extracted_commits,'compiled_diary_list':info},
-        as_agent=True)  # marks it as if an agent updated the state
+        {'extracted_commits':extracted_commits,'compiled_diary_list':info})  # marks it as if an agent updated the state
         print(info)
         print('\n\n\n\n\n\n\n\n\n\n\n')
     
