@@ -119,11 +119,11 @@ def text_composer(thread_id):
         print(summary_prompt)
         summary = llm.invoke(summary_prompt)
         # INSERT THE SUMMARY AS A KEY IN THE INFO DICTIONARY   
-        info = {'compiled_diary':compiled_diary.content,'summary':summary,'repo':bytes.fromhex(thread_id).decode("utf-8"),'date':date}
+        info = {'compiled_diary':compiled_diary.content,'summary':summary.content,'repo':bytes.fromhex(thread_id).decode("utf-8"),'date':date}
         extracted_commits = df.to_dict(orient='records')
         graph.update_state(
         {"configurable": {"thread_id": thread_id}},
-        {'extracted_commits':extracted_commits,'compiled_diary_list':info})  # marks it as if an agent updated the state
+        {'extracted_commits':extracted_commits,'compiled_diary_list':[info]})  # marks it as if an agent updated the state
         print(info)
         print('\n\n\n\n\n\n\n\n\n\n\n')
     
