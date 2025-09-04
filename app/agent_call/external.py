@@ -115,6 +115,7 @@ def text_composer(thread_id):
         prompt = ChatPromptTemplate(
         [("system", "Write a concise summary of the following to capture the keypoint that could literally be used give the next essay to be generated a brief overview about what happened in this :\\n\\n{context}")])
         summary_prompt = prompt.invoke({"context": compiled_diary.content})
+        print(summary_prompt)
         summary = llm.invoke(summary_prompt)
         # INSERT THE SUMMARY AS A KEY IN THE INFO DICTIONARY   
         info = {'compiled_diary':compiled_diary.content,'summary':summary,'repo':bytes.fromhex(thread_id).decode("utf-8"),'date':date}
