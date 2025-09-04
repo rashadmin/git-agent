@@ -113,7 +113,8 @@ def text_composer(thread_id):
         print(temp_df['compiled'].value_counts())
         # Define prompt
         prompt = ChatPromptTemplate(
-        [("system", "Write a concise summary of the following to capture the keypoint that could literally be used give the next essay to be generated a brief overview about what happened in this :\\n\\n{context}")])
+        [("system", "Write a concise summary of the following to capture the keypoint that could literally be used give the next essay to be generated a brief overview about what happened in this :\\n\\n"),
+         ('human','{context}')])
         summary_prompt = prompt.invoke({"context": compiled_diary.content})
         print(summary_prompt)
         summary = llm.invoke(summary_prompt)
