@@ -10,7 +10,7 @@ from langchain.chat_models import init_chat_model
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.llm import LLMChain
 from langchain_core.prompts import ChatPromptTemplate
-
+import time
 
 
 def commit_update(commit,commit_message,repo,commit_id):
@@ -126,6 +126,7 @@ def text_composer(thread_id):
         {'extracted_commits':extracted_commits,'compiled_diary_list':[info]})  # marks it as if an agent updated the state
         print(info)
         print('\n\n\n\n\n\n\n\n\n\n\n')
+        time.sleep(5)
     
     # config = {"configurable": {"thread_id": thread_id}}
 
