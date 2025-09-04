@@ -114,8 +114,7 @@ def text_composer(thread_id):
         # Define prompt
         prompt = ChatPromptTemplate.from_messages(
         [("system", "Write a concise summary of the following to capture the keypoint that could literally be used give the next essay to be generated a brief overview about what happened in this :\\n\\n{context}")])
-        chain = create_stuff_documents_chain(llm, prompt)
-        summary = chain.invoke({"context": compiled_diary.content})
+        summary = llm.invoke(prompt.invoke({"context": compiled_diary.content}))
         # INSERT THE SUMMARY AS A KEY IN THE INFO DICTIONARY   
         info = {'compiled_diary':compiled_diary.content,'summary':summary,'repo':bytes.fromhex(thread_id).decode("utf-8"),'date':date}
         extracted_commits = df.to_dict(orient='records')
