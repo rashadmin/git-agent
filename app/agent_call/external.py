@@ -94,6 +94,7 @@ def text_composer(thread_id):
     unique_date = uncompiled_df['date'].unique()
     print(df['compiled'].value_counts())
     for date in sorted(unique_date):
+        state = graph.get_state(config=config).values
         index = df_unique_date.index(date)
         #GET THE SUMMARY OF THE PREVIOUS COMMIT DATE:
         if index !=0:
