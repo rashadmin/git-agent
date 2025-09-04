@@ -51,13 +51,21 @@ def get_all_commits(payload):
     GITHUB_API_URL = "https://api.github.com"
     GITHUB_TOKEN = current_app.config['GITHUB_TOKEN']
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-    # Fetch the latest contents of each file
-    url = f"{GITHUB_API_URL}/repos/{repo}/commits"
-    r = requests.get(url, headers=headers)
-    if r.status_code == 200:
-        data = r.json()
-    else:
-        data = []
+    page = 1
+    data =[]
+    while True:
+        url = f"{GITHUB_API_URL}/repos/{repo}/commits?per_page=100&page={page}"
+        r = requests.get(url)
+        response = requests.get(url)
+        datum = response.json()
+
+        if not datum:  # stop when no more commits
+            break
+
+        data.extend(datum)
+        page += 1
+    # url = f"{GITHUB_API_URL}/repos/{repo}/commits"
+
     thread_id = payload['repository']['name'].encode("utf-8").hex()
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
