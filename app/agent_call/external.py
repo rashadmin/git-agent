@@ -62,15 +62,16 @@ def get_all_commits(payload):
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
     extracted_commit = {i['commit_id'] for i in state['extracted_commits']}
+    print('length of data',len(data))
     if len(data)-1==len(extracted_commit):
         formatted = format_github_request(repo,after_commit)
-        print
     elif len(data)==len(extracted_commit):
         formatted=[]
     else:
         commit_ids = {commit['sha'] for commit in data}
         commit_ids.difference_update(extracted_commit)
         formatted = [format_github_request(repo,commit) for commit in commit_ids]
+    print('length of formatting',len(formatted))
     #receiving a nested list of dictionary, flatten  to a list of dictionary
     #convert to data frame, and sort by date, convert to list of dictionary and return as formatted 
     return formatted
