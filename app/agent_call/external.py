@@ -89,7 +89,6 @@ def text_composer(thread_id):
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
     df = pd.DataFrame().from_records(state['extracted_commits'])
-    compiled_df = pd.DataFrame().from_records(state['compiled_diary_list'])
     df_unique_date= sorted(df['date'].unique())
     uncompiled_df = df[df['compiled']==False]
     unique_date = uncompiled_df['date'].unique()
@@ -98,6 +97,7 @@ def text_composer(thread_id):
         index = df_unique_date.index(date)
         #GET THE SUMMARY OF THE PREVIOUS COMMIT DATE:
         if index !=0:
+            compiled_df = pd.DataFrame().from_records(state['compiled_diary_list'])
             backlog_date = df_unique_date[index-1]
             backlog_summary = compiled_df[compiled_df['date']==backlog_date]['summary']
         else:
