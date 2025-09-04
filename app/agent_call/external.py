@@ -34,7 +34,7 @@ def format_github_request(repo,after_commit):
         commit_id = data['sha']
         #COMMIT DATE CREATED
         commit_date=data['commit']['committer']['date']
-        commit_message = data['commit']['message']
+        commit_message = data['commit']['author']['date']
         commits = data['files']#[1]#['patch']
         changed_files = [commit_update(commit,commit_message,repo,commit_id) for commit in commits if (commit['filename'].find('/lib/') < 0 and  \
                         commit['filename'].find('/bin/') < 0 and commit['filename'].find('ipynb_checkpoints/') < 0 and commit['filename'].find('pycache') < 0)]
