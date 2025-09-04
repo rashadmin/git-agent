@@ -89,7 +89,7 @@ def text_composer(thread_id):
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
     df = pd.DataFrame().from_records(state['extracted_commits'])
-    compiled_df = pd.DataFrame().from_records(state['compiled_diary'])
+    compiled_df = pd.DataFrame().from_records(state['compiled_diary_list'])
     df_unique_date= sorted(df['date'].unique())
     uncompiled_df = df[df['compiled']==False]
     unique_date = uncompiled_df['date'].unique()
