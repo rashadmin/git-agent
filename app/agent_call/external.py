@@ -7,6 +7,10 @@ from app.extensions import checkpointer
 # from app.agent_call.graph import graph
 import os
 from langchain.chat_models import init_chat_model
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains.llm import LLMChain
+from langchain_core.prompts import ChatPromptTemplate
+
 
 
 def commit_update(commit,commit_message,repo,commit_id):
@@ -75,10 +79,9 @@ def text_composer(thread_id):
     from app.agent_call.graph import graph
     prompt_template = ChatPromptTemplate([('system',
     "You will be given a list of strings.Each string contain : `a patch which contains description of what happened in the updated code"
-    "A filename which is the file the changed occured` "
-    "I want you to create a diary post that will talk about the changes that occured throughout the series of the timeline represented as the timestamp in the serialized json string"
-    "E.g A line of code might have been added in a previous index of the list, if the new patch in current timestamp indicates that the line was remove or changed, kindly indicate it, let it be shown as a story timeline"
-
+    "A filename which is the file the changed occured` and also a summary {summary} of what happened in the previous post like a review, so you can continue it based on the previous post"
+    "I want you to create a diary post that will talk about the changes that occured throughout the series of the commits in the string"
+    "E.g A line of code might have been added in a previous index of the list, if the new patch in current index indicates that the line was remove or changed, kindly indicate it, let it be shown as a story"
                         ),
     ('human','{patch}')])
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
@@ -86,21 +89,35 @@ def text_composer(thread_id):
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
     df = pd.DataFrame().from_records(state['extracted_commits'])
+    compiled_df = pd.DataFrame().from_records(state['compiled_diary'])
+    df_unique_date= sorted(df['date'].unique())
     uncompiled_df = df[df['compiled']==False]
     unique_date = uncompiled_df['date'].unique()
     print(df['compiled'].value_counts())
-    compiled_diary_list = []
-    for date in unique_date:
+    for date in sorted(unique_date):
+        index = df_unique_date.index(date)
+        #GET THE SUMMARY OF THE PREVIOUS COMMIT DATE:
+        if index !=0:
+            backlog_date = df_unique_date[index-1]
+            backlog_summary = compiled_df[compiled_df['date']==backlog_date]['summary']
+        else:
+            backlog_summary = ''
         temp_df = uncompiled_df[uncompiled_df['date']==date]
         print(temp_df['compiled'].value_counts())
         print(temp_df.head())
         temp_df['file_patch'] = 'FileName : ' + temp_df['filename'] + 'Patch : ' + temp_df['Patch']
         patch = temp_df['file_patch'].tolist()
-        patch_prompt = prompt_template.invoke({'patch':patch})#change from state to df slice
+        patch_prompt = prompt_template.invoke({'patch':patch,'summary':backlog_summary})#change from state to df slice
         compiled_diary = llm.invoke(patch_prompt)
         df.loc[df['date']==date,'compiled'] = True
         print(temp_df['compiled'].value_counts())
-        info = {'compiled_diary':compiled_diary.content,'repo':bytes.fromhex(thread_id).decode("utf-8"),'date':date}
+        # Define prompt
+        prompt = ChatPromptTemplate.from_messages(
+        [("system", "Write a concise summary of the following to capture the keypoint that could literally be used give the next essay to be generated a brief overview about what happened in this :\\n\\n{context}")])
+        chain = create_stuff_documents_chain(llm, prompt)
+        summary = chain.invoke({"context": compiled_diary.content})
+        # INSERT THE SUMMARY AS A KEY IN THE INFO DICTIONARY   
+        info = {'compiled_diary':compiled_diary.content,'summary':summary,'repo':bytes.fromhex(thread_id).decode("utf-8"),'date':date}
         extracted_commits = df.to_dict(orient='records')
         graph.update_state(
         {"configurable": {"thread_id": thread_id}},
