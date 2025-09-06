@@ -1,19 +1,34 @@
 from flask import jsonify,request,url_for
-from app.models import Post
+from app.models import Post,User
 from app.api import bp
 from app.api.errors import bad_request
 from app import db
-
-
-@bp.route('/posts', methods=['POST'])
-def create_posts():
-    data = request.get_json() or {}
-    if 'summary' not in data or 'body' not in data or 'repo' not in data or 'date_committed' not in data:
-        return bad_request('must include summary,body,date_committed,repo fields')
-    if Post.query.get_or_404(data['id']).first():
-        return bad_request('please use a different username')
+import pandas as pd
+from app.agent_call.external import doy_to_date
+import time
+@bp.route('/posts/<thread_id>/<date>', methods=['POST'])
+def create_posts(thread_id,date):
+    from app.agent_call.graph import graph
+    config = {"configurable": {"thread_id": str(thread_id)}}
+    print(type(thread_id))
+    # time.sleep(1)
+    state = graph.get_state(config=config).values
+    username = 'rashadmin'#state['user_id']
+    user_id = User.query.filter_by(username=username).first().id
+    if user_id is None:
+        return bad_request('User does not exist')
+    # info = state['compiled_dictionary']
+    compiled_df = pd.DataFrame().from_records(state['compiled_diary_list'])
+    info = compiled_df[compiled_df['date']==date].iloc[0].to_dict()
+    print(compiled_df)
+    id = f'{username}{info['repo']}{date}'.encode("utf-8").hex()
+    year =int(date.split('-')[0])
+    dayofyear = int(date.split('-')[1])
+    date_committed = doy_to_date(year,dayofyear)
+    info.update({'body':info['compiled_diary'],'date_committed':date_committed,'user_id':user_id,'id':id})
+    info.pop('compiled_diary')
     post = Post()
-    post.from_dict(data)
+    post.from_dict(info)
     db.session.add(post)
     db.session.commit()
     response = jsonify(post.to_dict())
@@ -22,13 +37,13 @@ def create_posts():
     return response
 
 
-@bp.route('/posts/<str:id>', methods=['GET'])
+@bp.route('/posts/<id>', methods=['GET'])
 def get_post(id):
     return jsonify(Post.query.get_or_404(id).to_dict())
 
 
 
-@bp.route('/posts/<str:id>', methods=['PUT'])
+@bp.route('/posts/<id>', methods=['PUT'])
 def update_post(id):
     post = Post.query.get_or_404(id)
     data = request.get_json() or {}

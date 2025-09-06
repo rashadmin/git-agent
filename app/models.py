@@ -35,11 +35,13 @@ class PaginatedAPIMixin(object):
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
-    firstname = db.Column(db.String(64), index=True, unique=True)
-    lastname = db.Column(db.String(64), index=True, unique=True)
+    firstname = db.Column(db.String(64), index=True)
+    lastname = db.Column(db.String(64), index=True)
     email = db.Column(db.String(120), index=True, unique=True)
     about_me = db.Column(db.String(360))
     password_hash = db.Column(db.String(128))
+
+## add user to get post
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -80,8 +82,8 @@ class User(UserMixin,db.Model):
             self.set_password(data['password'])
 
 class Post(PaginatedAPIMixin,db.Model):
-    id = db.Column(db.String(10), primary_key=True)
-    repo = db.Column(db.String(64), index=True, unique=True)
+    id = db.Column(db.String(64), primary_key=True)
+    repo = db.Column(db.String(64), index=True)
     summary = db.Column(db.String(360), index=True)
     body = db.Column(db.String())
     date_commited = db.Column(db.DateTime, index=True)
@@ -107,12 +109,12 @@ class Post(PaginatedAPIMixin,db.Model):
             '_links': {
                 'self': url_for('api.get_post', id=self.id),
                 'user':  url_for('api.get_user', id=self.user_id),
-                'avatar': self.avatar(128)
+                'avatar': user.avatar(128)
             }
         }
 
 
     def from_dict(self, data):
-        for field in ['user_id', 'body', 'date_committed','id']:
+        for field in ['user_id','summary','repo' ,'body', 'date_committed','id']:
             if field in data:
                 setattr(self, field, data[field])

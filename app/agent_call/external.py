@@ -6,12 +6,21 @@ import pandas as pd
 from app.extensions import checkpointer
 # from app.agent_call.graph import graph
 import os
+from app import db
 from langchain.chat_models import init_chat_model
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.llm import LLMChain
 from langchain_core.prompts import ChatPromptTemplate
 import time
+from app.models import Post,User
+from datetime import datetime,timedelta
 
+def doy_to_date(year: int, doy: int):
+    # January 1 of that year
+    start = datetime(year, 1, 1)
+    # Add (doy - 1) days
+    date = start + timedelta(days=doy - 1)
+    return date.strftime("%Y-%m-%d")
 
 def commit_update(commit,commit_message,repo,commit_id):
     commit.update({'message':commit_message,'repo_name':repo.split('/')[-1],'commit_id':commit_id})
@@ -134,10 +143,26 @@ def text_composer(thread_id):
         graph.update_state(
         {"configurable": {"thread_id": thread_id}},
         {'extracted_commits':extracted_commits,'compiled_diary_list':[info]})  # marks it as if an agent updated the state
+        username = state['user_id']
+        user_id = User.query.filter_by(username=username).first().id
+        id = (username+info['repo']+date).encode("utf-8").hex()
+        year =int(date.split('-')[0])
+        dayofyear = int(date.split('-')[1])
+        date_committed = doy_to_date(year,dayofyear)
+        info.update({'body':info['compiled_diary'],'date_committed':date_committed,'user_id':user_id,'id':id})
+        info.pop('compiled_diary')
+        post = Post()
+        post.from_dict(info)
+        db.session.add(post)
+        db.session.commit()
         print(info)
-        print('\n\n\n\n\n\n\n\n\n\n\n')
-        time.sleep(5)
-    
+        print('\n\n\n\n\n\n\n\n\n\n\n')    
+
+
+    #use githubname as username
+
+
+
     # config = {"configurable": {"thread_id": thread_id}}
 
     # extracted_commits = graph.get_state(config=config).values['extracted_commits']

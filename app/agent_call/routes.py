@@ -31,9 +31,10 @@ def run_agent():
     if event != "push":
         return jsonify({"msg": "Not a push event"}), 200
     data = request.json
-    thread_id = data['repository']['name'].encode("utf-8").hex()
+    thread_id = data['repository']['fullname'].encode("utf-8").hex()
+    username = data["repository"]["full_name"].split('/')[0]
     config = {"configurable": {"thread_id": thread_id}}
-    graph.invoke({'commits':data},config=config)
+    graph.invoke({'commits':data,'user_id':username},config=config)
     # user_input = data.get("message")
     # thread_id = data.get("thread_id", "default")
     # active_thread_id = thread_id

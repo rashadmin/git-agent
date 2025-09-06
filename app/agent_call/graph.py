@@ -22,7 +22,6 @@ from langgraph.checkpoint.postgres import PostgresSaver
 
 
 
-
 # ---- State Definition ----
 def add(left, right):
     left.extend(right)
@@ -63,6 +62,7 @@ class Repository(BaseModel):
 
 class AgentState(TypedDict):
     commits:str
+    user_id:str
     formatted_commits:Annotated[List[dict],add]
     extracted_commits:Annotated[List[dict],adder]
     compiled_diary_list:Annotated[List[dict],add]
