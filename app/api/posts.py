@@ -14,7 +14,7 @@ def create_posts(thread_id,date):
     # time.sleep(1)
     state = graph.get_state(config=config).values
     username = 'rashadmin'#state['user_id']
-    user_id = User.query.filter_by(username=username).first().id
+    user_id = User.query.filter_by(username=username).first_or_404().id
     if user_id is None:
         return bad_request('User does not exist')
     # info = state['compiled_dictionary']

@@ -50,7 +50,7 @@ def get_users():
 @bp.route('/users/<username>/posts', methods=['GET'])
 def get_user_posts(username):
     username = 'rashadmin'#state['user_id']
-    user = User.query.filter_by(username=username).first()
+    user = User.query.filter_by(username=username).first_or_404()
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
     data = User.to_collection_dict(user.posts, page, per_page,
