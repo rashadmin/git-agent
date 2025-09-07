@@ -20,7 +20,7 @@ def doy_to_date(year: int, doy: int):
     start = datetime(year, 1, 1)
     # Add (doy - 1) days
     date = start + timedelta(days=doy - 1)
-    return date.strftime("%Y-%m-%d")
+    return date
 
 def commit_update(commit,commit_message,repo,commit_id):
     commit.update({'message':commit_message,'repo_name':repo.split('/')[-1],'commit_id':commit_id})
@@ -156,7 +156,8 @@ def text_composer(thread_id):
         db.session.add(post)
         db.session.commit()
         print(info)
-        print('\n\n\n\n\n\n\n\n\n\n\n')    
+        print('\n\n\n\n\n\n\n\n\n\n\n')  
+      
 
 
     #use githubname as username

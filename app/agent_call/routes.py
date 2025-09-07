@@ -8,13 +8,17 @@ from app.agent_call import bp
 from datetime import datetime,timedelta
 from langgraph.types import Command
 from app.extensions import checkpointer,conn
-
-
+import pandas as pd
+from app.models import User,Post
+from app import db
+from app.agent_call.external import doy_to_date
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
 # listener_thread.start()
 
 #to add model
+def yday_to_date(row):
+    return datetime(int(row["year"]), 1, 1) + timedelta(days=int(row["dayofyear"]) - 1)
 
 
 @bp.route("/health",methods=['GET'])
@@ -55,6 +59,33 @@ def compose_text():
     # we will query the db for the checkpointer to return all threads that was modified the previous day
     for thread_id in today_thread_id:
         text_composer(thread_id)
+        repo = bytes.fromhex(thread_id).decode("utf-8")
+        cur.execute(f'SELECT date_committed FROM posts where repo ={repo}')
+        config = {"configurable": {"thread_id": thread_id}}
+        state = graph.get_state(config=config).values
+        date_in_db = cur.fetchall()
+        df = pd.DataFrame().from_records(state['compiled_diary_lists'])
+        date_in_diary = df['date'].str.split('-',expand=True).rename(columns={0:'year',1:'dayofyear'})
+        date_in_diary_val = date_in_diary.apply(yday_to_date, axis=1).values
+        for date in date_in_diary_val:
+            # conver from datetime to date
+            dayofyear= date.dt.dayofyear.astype(str)
+            year = date.dt.year.astype(str)
+            coded_date = year+'-'+dayofyear
+            info = df[df['date']==coded_date].iloc[0].to_dict()
+            if not date in date_in_db:
+                username=repo.split('/')[0]
+                user_id = User.query.filter_by(username=username).first().id
+                id = (username+repo+coded_date).encode("utf-8").hex()
+                info.update({'body':info['compiled_diary'],'date_committed':date,'user_id':user_id,'id':id})
+                info.pop('compiled_diary')
+                post = Post()
+                post.from_dict(info)
+                db.session.add(post)
+                db.session.commit()
+        #convert the date in the diary list to an actual date, check if it is in db, if not, add it to it
+
+
     return 'DONE'
     # return state.values['extracted_commits']
 
