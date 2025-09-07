@@ -4,6 +4,7 @@ import threading
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+import sqlalchemy as sa
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -21,6 +22,13 @@ def create_app(config_class=Config):
         app.register_blueprint(agent_call_bp,url_prefix='/agent_call')
         from app.api import bp as api_bp
         app.register_blueprint(api_bp, url_prefix='/api')
+    engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    inspector = sa.inspect(engine)
+    if not inspector.has_table("user"):
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+            app.logger.info('Initialized the database!')
     return app
 
 # from app.agent_call import routes
