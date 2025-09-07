@@ -64,7 +64,7 @@ def compose_text():
         config = {"configurable": {"thread_id": thread_id}}
         state = graph.get_state(config=config).values
         date_in_db = cur.fetchall()
-        df = pd.DataFrame().from_records(state['compiled_diary_lists'])
+        df = pd.DataFrame().from_records(state['compiled_diary_list'])
         date_in_diary = df['date'].str.split('-',expand=True).rename(columns={0:'year',1:'dayofyear'})
         date_in_diary_val = date_in_diary.apply(yday_to_date, axis=1).values
         for date in date_in_diary_val:
