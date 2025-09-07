@@ -39,7 +39,7 @@ class User(UserMixin,PaginatedAPIMixin,db.Model):
     lastname = db.Column(db.String(64), index=True)
     email = db.Column(db.String(120), index=True, unique=True)
     about_me = db.Column(db.String(360))
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(256))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
 
 ## add user to get post
@@ -118,3 +118,8 @@ class Post(PaginatedAPIMixin,db.Model):
         for field in ['user_id','summary','repo' ,'body', 'date_committed','id']:
             if field in data:
                 setattr(self, field, data[field])
+
+
+
+
+                
