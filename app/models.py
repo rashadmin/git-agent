@@ -81,7 +81,7 @@ class User(UserMixin,PaginatedAPIMixin,db.Model):
             self.set_password(data['password'])
 
 class Post(PaginatedAPIMixin,db.Model):
-    id = db.Column(db.String(64), primary_key=True)
+    id = db.Column(db.String(128), primary_key=True)
     repo = db.Column(db.String(64), index=True)
     summary = db.Column(db.Text, index=True)
     body = db.Column(db.Text)

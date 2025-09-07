@@ -99,7 +99,7 @@ def extraction_node(state:AgentState):
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     extracted_commits = []
     print('could be here \n\n\n\n\n\n')
-    print(state['formatted_commits'])
+    # print(state['formatted_commits'])
     df = pd.DataFrame().from_records(state['formatted_commits'])
     df['commit_date'] = pd.to_datetime(df['commit_date'])
     df.sort_values('commit_date',inplace=True)
