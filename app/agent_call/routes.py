@@ -73,6 +73,7 @@ def compose_text():
             year = str(pd.Timestamp(date).year)
             coded_date = year+'-'+dayofyear
             info = df[df['date']==coded_date].iloc[0].to_dict()
+            print(date,'\n\n\n\n\n\n')
             if not date in date_in_db:
                 username=repo.split('/')[0]
                 user_id = User.query.filter_by(username=username).first().id
