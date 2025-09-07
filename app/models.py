@@ -83,8 +83,8 @@ class User(UserMixin,PaginatedAPIMixin,db.Model):
 class Post(PaginatedAPIMixin,db.Model):
     id = db.Column(db.String(64), primary_key=True)
     repo = db.Column(db.String(64), index=True)
-    summary = db.Column(db.String(360), index=True)
-    body = db.Column(db.String())
+    summary = db.Column(db.Text, index=True)
+    body = db.Column(db.Text)
     date_commited = db.Column(db.DateTime, index=True)
     date_posted = db.Column(db.DateTime, index=True, default=datetime.now)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
