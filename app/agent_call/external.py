@@ -45,7 +45,7 @@ def format_github_request(repo,after_commit):
         commit_date=data['commit']['committer']['date']
         commit_message = data['commit']['author']['date']
         commits = data['files']#[1]#['patch']
-        changed_files = [commit_update(commit,commit_message,repo,commit_id) for commit in commits if (commit['filename'].find('/lib/') < 0 and  \
+        changed_files = [commit_update(commit,commit_message,repo,commit_id) for commit in commits if (commit['filename'].find('/lib/') < 0 and commit['filename'].find('requirements.txt') < 0 and \
                         commit['filename'].find('/bin/') < 0 and commit['filename'].find('ipynb_checkpoints/') < 0 and commit['filename'].find('pycache') < 0 and commit['filename'].find('migrations') < 0)]
         changed_files = [f'No({index+1}) {commit}' for index,commit in enumerate(changed_files)]
         changed_files = [add_date(commit_date,commit) for commit in changed_files]
@@ -75,7 +75,7 @@ def get_all_commits(payload):
         page += 1
     # url = f"{GITHUB_API_URL}/repos/{repo}/commits"
 
-    thread_id = payload['repository']['name'].encode("utf-8").hex()
+    thread_id = payload['repository']['full_name'].encode("utf-8").hex()
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
     extracted_commit = {i['commit_id'] for i in state.get('extracted_commits',[])}
