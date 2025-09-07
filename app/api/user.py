@@ -47,6 +47,15 @@ def get_users():
     pass
 
 
+@bp.route('/users/<username>/posts', methods=['GET'])
+def get_user_posts(username):
+    username = 'rashadmin'#state['user_id']
+    user = User.query.filter_by(username=username).first()
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)
+    data = User.to_collection_dict(user.posts, page, per_page,
+                                   'api.get_user_posts', username=username)
+    return jsonify(data)
 
 # {
 #     "id": 123,

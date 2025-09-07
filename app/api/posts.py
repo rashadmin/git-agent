@@ -41,6 +41,13 @@ def create_posts(thread_id,date):
 def get_post(id):
     return jsonify(Post.query.get_or_404(id).to_dict())
 
+@bp.route('/posts', methods=['GET'])
+def get_posts():
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)
+    data = User.to_collection_dict(User.query, page, per_page,
+                                   'api.get_posts')
+    return jsonify(data)
 
 
 @bp.route('/posts/<id>', methods=['PUT'])

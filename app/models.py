@@ -32,7 +32,7 @@ class PaginatedAPIMixin(object):
         }
         return data
 
-class User(UserMixin,db.Model):
+class User(UserMixin,PaginatedAPIMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     firstname = db.Column(db.String(64), index=True)
@@ -40,6 +40,7 @@ class User(UserMixin,db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     about_me = db.Column(db.String(360))
     password_hash = db.Column(db.String(128))
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
 
 ## add user to get post
 
@@ -66,14 +67,12 @@ class User(UserMixin,db.Model):
             'post_count': self.posts.count(),
             '_links': {
                 'self': url_for('api.get_user', id=self.id),
-                'followers': url_for('api.get_followers', id=self.id),
-                'followed': url_for('api.get_followed', id=self.id),
                 'avatar': self.avatar(128)
             }
         }
         if include_email:
             data['email'] = self.email
-
+        return data
     def from_dict(self, data, new_user=False):
         for field in ['username', 'email', 'about_me','firstname','lastname']:
             if field in data:
@@ -112,6 +111,7 @@ class Post(PaginatedAPIMixin,db.Model):
                 'avatar': user.avatar(128)
             }
         }
+        return data
 
 
     def from_dict(self, data):
