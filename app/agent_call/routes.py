@@ -78,7 +78,7 @@ def compose_text():
                 username=repo.split('/')[0]
                 user_id = User.query.filter_by(username=username).first().id
                 id = (username+repo+coded_date).encode("utf-8").hex()
-                info.update({'body':info['compiled_diary'],'date_committed':date,'user_id':user_id,'id':id})
+                info.update({'body':info['compiled_diary'],'date_committed':pd.Timestamp(date).to_pydatetime(),'user_id':user_id,'id':id})
                 info.pop('compiled_diary')
                 post = Post()
                 post.from_dict(info)
