@@ -103,7 +103,7 @@ class Post(PaginatedAPIMixin,db.Model):
             'repo':self.repo,
             'summary':self.summary,
             'body': self.body,
-            'date_committed':self.date_commited,
+            'date_committed':self.date_committed,
             'date_posted':self.date_posted,
             '_links': {
                 'self': url_for('api.get_post', id=self.id),
