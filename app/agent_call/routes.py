@@ -69,8 +69,8 @@ def compose_text():
         date_in_diary_val = date_in_diary.apply(yday_to_date, axis=1).values
         for date in date_in_diary_val:
             # conver from datetime to date
-            dayofyear= date.dt.dayofyear.astype(str)
-            year = date.dt.year.astype(str)
+            dayofyear= str(pd.Timestamp(date).dayofyear)
+            year = str(pd.Timestamp(date).year)
             coded_date = year+'-'+dayofyear
             info = df[df['date']==coded_date].iloc[0].to_dict()
             if not date in date_in_db:
