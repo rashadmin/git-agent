@@ -85,7 +85,7 @@ class Post(PaginatedAPIMixin,db.Model):
     repo = db.Column(db.String(64), index=True)
     summary = db.Column(db.Text, index=True)
     body = db.Column(db.Text)
-    date_commited = db.Column(db.DateTime, index=True)
+    date_committed = db.Column(db.DateTime, index=True)
     date_posted = db.Column(db.DateTime, index=True, default=datetime.now)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
