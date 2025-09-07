@@ -10,6 +10,6 @@ class Config(object):
     if os.getenv('DATABASE_URL'):
         SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL').replace("postgres://", "postgresql://", 1)
     else:
-        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        SQLALCHEMY_DATABASE_URI = 'postgresql://git_agent_db_xocq_user:HRsa5HU2jL4y52lml80ZsmvG6dsjhlBF@dpg-d2r9j86r433s73fbnoa0-a.oregon-postgres.render.com/git_agent_db_xocq?sslmode=require' or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False

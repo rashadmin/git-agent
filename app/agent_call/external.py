@@ -78,7 +78,7 @@ def get_all_commits(payload):
     thread_id = payload['repository']['name'].encode("utf-8").hex()
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
-    extracted_commit = {i['commit_id'] for i in state['extracted_commits']}
+    extracted_commit = {i['commit_id'] for i in state.get('extracted_commits',[])}
     print('length of data',len(data))
     if len(data)-1==len(extracted_commit):
         formatted = format_github_request(repo,after_commit)
