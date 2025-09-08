@@ -21,7 +21,7 @@ def create_user():
     db.session.commit()
     response = jsonify(user.to_dict())
     response.status_code = 201
-    response.headers['Location'] = url_for('api.get_user', id=user.id)
+    response.headers['Location'] = url_for('api.get_user', username=user.username)
     return response
 
 @bp.route('/users/<username>', methods=['GET'])
@@ -31,7 +31,7 @@ def get_user(username):
     return jsonify(user.to_dict())
 
 
-@bp.route('/users/<username>', methods=['PUT'])
+@bp.route(' ', methods=['PUT'])
 @token_auth.login_required
 def update_user(username):
     username = 'rashadmin'#state['user_id']
