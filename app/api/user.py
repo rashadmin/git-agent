@@ -24,9 +24,11 @@ def create_user():
     response.headers['Location'] = url_for('api.get_user', id=user.id)
     return response
 
-@bp.route('/users/<int:id>', methods=['GET'])
-def get_user(id):
-    return jsonify(User.query.get_or_404(id).to_dict())
+@bp.route('/users/<username>', methods=['GET'])
+def get_user(username):
+    username = 'rashadmin'#state['user_id']
+    user = User.query.filter_by(username=username).first_or_404()
+    return jsonify(user.to_dict())
 
 
 @bp.route('/users/<int:id>', methods=['PUT'])
