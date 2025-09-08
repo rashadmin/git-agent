@@ -5,7 +5,7 @@ from flask import url_for
 from hashlib import md5
 from flask_login import UserMixin
 import os
-
+import base64
 
 @login.user_loader
 def load_user(id):
@@ -90,7 +90,7 @@ class User(UserMixin,PaginatedAPIMixin,db.Model):
             'about_me': self.about_me,
             'post_count': self.posts.count(),
             '_links': {
-                'self': url_for('api.get_user', id=self.id),
+                'self': url_for('api.get_user', username=self.username),
                 'avatar': self.avatar(128)
             }
         }
@@ -131,7 +131,7 @@ class Post(PaginatedAPIMixin,db.Model):
             'date_posted':self.date_posted,
             '_links': {
                 'self': url_for('api.get_post', id=self.id),
-                'user':  url_for('api.get_user', id=self.user_id),
+                'user':  url_for('api.get_user', username=user.username),
                 'avatar': user.avatar(128)
             }
         }
