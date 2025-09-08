@@ -6,6 +6,8 @@ from app import db
 import pandas as pd
 from app.agent_call.external import doy_to_date
 import time
+from app.api.auth import token_auth
+
 @bp.route('/posts/<thread_id>/<date>', methods=['POST'])
 def create_posts(thread_id,date):
     from app.agent_call.graph import graph
@@ -49,8 +51,8 @@ def get_posts():
                                    'api.get_posts')
     return jsonify(data)
 
-
 @bp.route('/posts/<id>', methods=['PUT'])
+@token_auth.login_required
 def update_post(id):
     post = Post.query.get_or_404(id)
     data = request.get_json() or {}

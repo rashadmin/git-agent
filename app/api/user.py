@@ -4,6 +4,7 @@ from app.models import User
 from app.api import bp
 from app.api.errors import bad_request
 from app import db
+from app.api.auth import token_auth
 
 @bp.route('/users', methods=['POST'])
 def create_user():
@@ -29,6 +30,7 @@ def get_user(id):
 
 
 @bp.route('/users/<int:id>', methods=['PUT'])
+@token_auth.login_required
 def update_user(id):
     user = User.query.get_or_404(id)
     data = request.get_json() or {}
@@ -69,3 +71,6 @@ def get_user_posts(username):
 #         "avatar": "https://www.gravatar.com/avatar/..."
 #     }
 # }
+
+
+# so for the edit user, we will first need to implement the login page and also the user page. the user page is visible to evryone but only a logged in user can edit information on the user page
