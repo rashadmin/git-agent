@@ -31,7 +31,7 @@ def get_user(username):
     return jsonify(user.to_dict())
 
 
-@bp.route(' ', methods=['PUT'])
+@bp.route('/users/<username>', methods=['PUT'])
 @token_auth.login_required
 def update_user(username):
     username = 'rashadmin'#state['user_id']
