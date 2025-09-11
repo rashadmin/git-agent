@@ -6,7 +6,7 @@ from hashlib import md5
 from flask_login import UserMixin
 import os
 import base64
-
+import json
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -108,7 +108,9 @@ class Post(PaginatedAPIMixin,db.Model):
     id = db.Column(db.String(128), primary_key=True)
     repo = db.Column(db.String(64), index=True)
     summary = db.Column(db.Text, index=True)
-    body = db.Column(db.Text)
+    twitter_thread = db.Column(db.Text, index=True)
+    facebook_post = db.Column(db.Text, index=True)
+    linkedin_post = db.Column(db.Text, index=True)
     date_committed = db.Column(db.DateTime, index=True)
     date_posted = db.Column(db.DateTime, index=True, default=datetime.now)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -126,7 +128,9 @@ class Post(PaginatedAPIMixin,db.Model):
             'last_name':user.lastname,
             'repo':self.repo,
             'summary':self.summary,
-            'body': self.body,
+            'twitter_thread':json.loads(self.twitter_thread),
+            'facebook_post':self.facebook_post, 
+            'linkedin_post':self.linkedin_post,
             'date_committed':self.date_committed,
             'date_posted':self.date_posted,
             '_links': {
@@ -139,9 +143,11 @@ class Post(PaginatedAPIMixin,db.Model):
 
 
     def from_dict(self, data):
-        for field in ['user_id','summary','repo' ,'body', 'date_committed','id']:
+        for field in ['user_id','summary','repo','twitter_thread', 'facebook_post', 'linkedin_post', 'date_committed','id']:
             if field in data:
                 setattr(self, field, data[field])
+        if field == 'twitter_thread':
+            setattr(self, field, json.dumps(data[field]))
 
 
 

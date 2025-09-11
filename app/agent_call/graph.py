@@ -40,7 +40,7 @@ def adder(left,right):
     df["compiled"] = df["compiled_new"].combine_first(df["compiled"])
 
     # Drop the helper column
-    df = df.drop(columns=["compiled_new"])
+    df = df.drop(columns=[col for col in df.columns if "new" in col])
     left = df.to_dict(orient='records')
     return left
     
@@ -127,6 +127,8 @@ def extraction_node(state:AgentState):
     print("Checkpointer type:", type(checkpointer))
     print('It was at extraction node')
     return {'extracted_commits':extracted_commits}
+
+# it is in reverseeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for the extracted commit, earliest come last
 
 # ---- Graph Definition ----
 builder = StateGraph(AgentState)

@@ -34,7 +34,6 @@ def get_user(username):
 @bp.route('/users/<username>', methods=['PUT'])
 @token_auth.login_required
 def update_user(username):
-    username = 'rashadmin'#state['user_id']
     user = User.query.filter_by(username=username).first_or_404()
     data = request.get_json() or {}
     if 'username' in data and data['username'] != user.username and \

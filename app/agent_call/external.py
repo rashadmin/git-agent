@@ -13,6 +13,7 @@ from langchain.chains.llm import LLMChain
 from langchain_core.prompts import ChatPromptTemplate
 import time
 from app.models import Post,User
+from app.agent_call.composer import run_compose
 from datetime import datetime,timedelta
 
 def doy_to_date(year: int, doy: int):
@@ -95,15 +96,6 @@ def get_all_commits(payload):
 
 def text_composer(thread_id):
     from app.agent_call.graph import graph
-    prompt_template = ChatPromptTemplate([('system',
-    "You will be given a list of strings.Each string contain : `a patch which contains description of what happened in the updated code"
-    "A filename which is the file the changed occured` and also a summary {summary} of what happened in the previous post like a review, so you can continue it based on the previous post"
-    "I want you to create a diary post that will talk about the changes that occured throughout the series of the commits in the string"
-    "E.g A line of code might have been added in a previous index of the list, if the new patch in current index indicates that the line was remove or changed, kindly indicate it, let it be shown as a story"
-                        ),
-    ('human','{patch}')])
-    os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
-    llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
     df = pd.DataFrame().from_records(state['extracted_commits'])
@@ -122,23 +114,14 @@ def text_composer(thread_id):
         else:
             backlog_summary = ''
         temp_df = uncompiled_df[uncompiled_df['date']==date]
-        print(temp_df['compiled'].value_counts())
-        print(temp_df.head())
+        day = len(state.get('compiled_diary_list',[]))+1
         temp_df['file_patch'] = 'FileName : ' + temp_df['filename'] + 'Patch : ' + temp_df['Patch']
         patch = temp_df['file_patch'].tolist()
-        patch_prompt = prompt_template.invoke({'patch':patch,'summary':backlog_summary})#change from state to df slice
-        compiled_diary = llm.invoke(patch_prompt)
+        result = run_compose(day=day,commit_logs=patch,previous_summary=backlog_summary)
+        info = {'twitter_thread':result['twitter_thread']['tweets'],'facebook_post':result['facebook_post'].content,
+         'linkedin_post':['linkedin_post'].content,'summary':['summary'].content,'repo':bytes.fromhex(thread_id).decode("utf-8"),
+         'date':date}
         df.loc[df['date']==date,'compiled'] = True
-        print(temp_df['compiled'].value_counts())
-        # Define prompt
-        prompt = ChatPromptTemplate(
-        [("system", "Write a concise summary of the following to capture the keypoint that could literally be used give the next essay to be generated a brief overview about what happened in this :\\n\\n"),
-         ('human','{context}')])
-        summary_prompt = prompt.invoke({"context": compiled_diary.content})
-        print(summary_prompt)
-        summary = llm.invoke(summary_prompt)
-        # INSERT THE SUMMARY AS A KEY IN THE INFO DICTIONARY   
-        info = {'compiled_diary':compiled_diary.content,'summary':summary.content,'repo':bytes.fromhex(thread_id).decode("utf-8"),'date':date}
         extracted_commits = df.to_dict(orient='records')
         graph.update_state(
         {"configurable": {"thread_id": thread_id}},
@@ -149,8 +132,7 @@ def text_composer(thread_id):
         year =int(date.split('-')[0])
         dayofyear = int(date.split('-')[1])
         date_committed = doy_to_date(year,dayofyear)
-        info.update({'body':info['compiled_diary'],'date_committed':date_committed,'user_id':user_id,'id':id})
-        info.pop('compiled_diary')
+        info.update({'date_committed':date_committed,'user_id':user_id,'id':id})
         post = Post()
         post.from_dict(info)
         db.session.add(post)
