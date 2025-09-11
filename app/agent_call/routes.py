@@ -37,6 +37,7 @@ def run_agent():
     data = request.json
     thread_id = data['repository']['full_name'].encode("utf-8").hex()
     username = data["repository"]["full_name"].split('/')[0]
+    print('yhhhhhhhhhhhhhhhhhhhhhh\n\n\n\n\n\n\n\n')
     config = {"configurable": {"thread_id": thread_id}}
     graph.invoke({'commits':data,'user_id':username},config=config)
     # user_input = data.get("message")
