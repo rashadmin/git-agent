@@ -5,7 +5,6 @@ from flask import current_app
 from langchain.chat_models import init_chat_model
 import os
 from pydantic import BaseModel,Field
-config = {'GOOGLE_API_KEY':'AIzaSyC639sFB_Aiah4DTyDOY8H-GVpJRid_AMk'}    
 
 class TwitterThread(BaseModel):
     tweets: List[str] = Field(description='You are to contain a list of threads which will be of type str, plain text only ')
@@ -64,14 +63,14 @@ linkedin_prompt = ChatPromptTemplate([("system",
 
 
 def summary_node(state:ComposeState):
-    os.environ["GOOGLE_API_KEY"] = config['GOOGLE_API_KEY']# 
+    os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     summary_prompt_text = summary_prompt.invoke({'Day':state['day'],'previous_summary':state['previous_summary'],'commit_logs':state['commit_logs']})
     summary = llm.invoke(summary_prompt_text)
     return {'summary':summary}
 
 def twitter_node(state:ComposeState):
-    os.environ["GOOGLE_API_KEY"] = config['GOOGLE_API_KEY']# 
+    os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     structured_llm = llm.with_structured_output(schema=TwitterThread)
     twitter_prompt_text = twitter_prompt.invoke({'summary':state['summary']})
@@ -80,14 +79,14 @@ def twitter_node(state:ComposeState):
 
 
 def facebook_node(state:ComposeState):
-    os.environ["GOOGLE_API_KEY"] = config['GOOGLE_API_KEY']# 
+    os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     facebook_prompt_text=facebook_prompt.invoke({'summary':state['summary']})
     facebook_post = llm.invoke(facebook_prompt_text)
     return {'facebook_post':facebook_post}
 
 def linkedin_node(state:ComposeState):
-    os.environ["GOOGLE_API_KEY"] = config['GOOGLE_API_KEY']# 
+    os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     linkedin_prompt_text=linkedin_prompt.invoke({'summary':state['summary']})
     linkedin_post = llm.invoke(linkedin_prompt_text)
