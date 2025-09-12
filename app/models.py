@@ -146,8 +146,7 @@ class Post(PaginatedAPIMixin,db.Model):
         for field in ['user_id','summary','repo', 'facebook_post', 'linkedin_post', 'date_committed','id']:
             if field in data:
                 setattr(self, field, data[field])
-        if field == 'twitter_thread':
-            setattr(self, field, json.dumps(data[field]))
+        self.twitter_thread = json.dumps(data["twitter_thread"])
 
 
 

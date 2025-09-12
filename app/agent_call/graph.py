@@ -24,6 +24,8 @@ from langgraph.checkpoint.postgres import PostgresSaver
 
 # ---- State Definition ----
 def add(left, right):
+    if right == "__RESET__":
+        return []
     left.extend(right)
     return left
 

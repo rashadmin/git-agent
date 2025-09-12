@@ -133,9 +133,13 @@ def text_composer(thread_id):
         dayofyear = int(date.split('-')[1])
         date_committed = doy_to_date(year,dayofyear)
         info.update({'date_committed':date_committed,'user_id':user_id,'id':id})
-        post = Post()
-        post.from_dict(info)
-        db.session.add(post)
+        existing = db.session.get(Post, id)
+        if existing is None:
+            post = Post()
+            post.from_dict(info)
+            db.session.add(post)
+        else:
+            existing.from_dict(info)
         db.session.commit()
         print(info)
         print('\n\n\n\n\n\n\n\n\n\n\n')  
