@@ -118,7 +118,7 @@ def text_composer(thread_id):
         temp_df['file_patch'] = 'FileName : ' + temp_df['filename'] + 'Patch : ' + temp_df['Patch']
         patch = temp_df['file_patch'].tolist()
         result = run_compose(day=day,commit_logs=patch,previous_summary=backlog_summary)
-        info = {'twitter_thread':result['twitter_thread']['tweets'],'facebook_post':result['facebook_post'].content,
+        info = {'twitter_thread':result['twitter_thread'],'facebook_post':result['facebook_post'].content,
          'linkedin_post':result['linkedin_post'].content,'summary':result['summary'].content,'repo':bytes.fromhex(thread_id).decode("utf-8"),
          'date':date}
         df.loc[df['date']==date,'compiled'] = True

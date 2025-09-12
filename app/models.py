@@ -116,7 +116,7 @@ class Post(PaginatedAPIMixin,db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '<Post {}>'.format(self.body)
+        return '<Post {}>'.format(self.summary)
     
     def to_dict(self):
         user = User.query.get_or_404(self.user_id)
@@ -128,7 +128,7 @@ class Post(PaginatedAPIMixin,db.Model):
             'last_name':user.lastname,
             'repo':self.repo,
             'summary':self.summary,
-            'twitter_thread':json.loads(self.twitter_thread),
+            'twitter_thread':json.loads(self.twitter_thread)['tweets'],
             'facebook_post':self.facebook_post, 
             'linkedin_post':self.linkedin_post,
             'date_committed':self.date_committed,
@@ -143,7 +143,7 @@ class Post(PaginatedAPIMixin,db.Model):
 
 
     def from_dict(self, data):
-        for field in ['user_id','summary','repo','twitter_thread', 'facebook_post', 'linkedin_post', 'date_committed','id']:
+        for field in ['user_id','summary','repo', 'facebook_post', 'linkedin_post', 'date_committed','id']:
             if field in data:
                 setattr(self, field, data[field])
         if field == 'twitter_thread':
