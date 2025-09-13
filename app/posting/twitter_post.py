@@ -3,10 +3,7 @@ from requests_oauthlib import OAuth1
 from flask import jsonify,request,current_app
 # --- Step 1: Authenticate with your Twitter/X API credentials ---
 # You need Elevated Access from the Twitter/X developer portal
-X_API_KEY = "Mh4P3YwoC0CNuafVnH3cM7GnP"
-X_API_KEY_SECRET = "a2f8M1dmeVosg1OBrqREN3o8QRoN5h0jGVHCbnFyGfnFSQbPgn"
-X_ACCESS_TOKEN = "1495333670885990400-BIG4EyonuA5Zx2devZr8hiDcL7LFgP"
-X_ACCESS_TOKEN_SECRET = "TyozT3bXVtzwhmhnoiKSgZ2U0Gm0QwTewaIzSj9310cUB"
+
 
 
 # --- Step 2: Define your thread content ---
