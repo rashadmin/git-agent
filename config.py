@@ -7,6 +7,11 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
     GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
     GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+    X_API_KEY = os.environ.get('X_API_KEY')
+    X_API_KEY_SECRET = os.environ.get('X_API_KEY_SECRET')
+    X_ACCESS_TOKEN = os.environ.get('X_ACCESS_TOKEN')
+    X_ACCESS_TOKEN_SECRET=os.environ.get('X_ACCESS_TOKEN_SECRET')
+    ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
     if os.getenv('DATABASE_URL'):
         SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL').replace("postgres://", "postgresql://", 1)
     else:

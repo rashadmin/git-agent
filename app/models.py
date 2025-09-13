@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import url_for
 from hashlib import md5
 from flask_login import UserMixin
+from app.posting.linkedin_post import post_linkedin
+from app.posting.twitter_post import post_thread
 import os
 import base64
 import json
@@ -131,6 +133,7 @@ class Post(PaginatedAPIMixin,db.Model):
             'twitter_thread':json.loads(self.twitter_thread)['tweets'],
             'facebook_post':self.facebook_post, 
             'linkedin_post':self.linkedin_post,
+            # 'post_linkedin':post_linkedin(self.)
             'date_committed':self.date_committed,
             'date_posted':self.date_posted,
             '_links': {

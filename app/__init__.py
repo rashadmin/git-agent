@@ -22,6 +22,8 @@ def create_app(config_class=Config):
         app.register_blueprint(agent_call_bp,url_prefix='/agent_call')
         from app.api import bp as api_bp
         app.register_blueprint(api_bp, url_prefix='/api')
+        from app.posting import bp as posting_bp
+        app.register_blueprint(posting_bp, url_prefix='/posting')
     engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     inspector = sa.inspect(engine)
     if not inspector.has_table("user"):
