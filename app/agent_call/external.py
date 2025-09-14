@@ -62,9 +62,9 @@ def get_all_commits(payload):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     page = 1
     data =[]
-    print(repo)
+    url = f"{GITHUB_API_URL}/repos/{repo}/commits?per_page=100&page={page}"
+    print(url)
     # while True:
-    #     url = f"{GITHUB_API_URL}/repos/{repo}/commits?per_page=100&page={page}"
     #     r = requests.get(url)
     #     response = requests.get(url)
     #     datum = response.json()
