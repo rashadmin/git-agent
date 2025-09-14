@@ -4,10 +4,13 @@ from app.agent_call.external import format_github_request,text_composer
 import threading
 import time
 import requests
+import psycopg
+from flask import jsonify,request,current_app
+
 from app.agent_call import bp
 from datetime import datetime,timedelta
 from langgraph.types import Command
-from app.extensions import checkpointer,conn
+from app.extensions import conn
 import pandas as pd
 from app.models import User,Post
 from app import db
@@ -51,6 +54,7 @@ def run_agent():
     
 @bp.route("/compose", methods=["GET"])
 def compose_text():
+    conn = psycopg.connect(current_app.config['SQLALCHEMY_DATABASE_URI'],autocommit=True)
     cur = conn.cursor()
     printer = []
     cur.execute("SELECT thread_id, checkpoint_id, checkpoint FROM checkpoints ORDER BY checkpoint_id DESC")

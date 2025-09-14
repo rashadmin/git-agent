@@ -5,12 +5,13 @@ from langgraph.types import Command
 from langgraph.runtime import Runtime
 from app.agent_call.external import format_github_request,get_all_commits
 from langgraph.checkpoint.memory import MemorySaver
+from app.extensions  import conn
 # import request
 from psycopg_pool import ConnectionPool
 import numpy as np
+from langgraph.checkpoint.postgres import PostgresSaver
+import psycopg
 import pandas as pd
-from app.extensions import checkpointer
-# from langgraph.checkpoint.postgres import PostgresCheckpointer
 import os
 from langchain_core.prompts import ChatPromptTemplate
 from flask import jsonify,current_app
@@ -19,8 +20,6 @@ import os
 from pydantic import BaseModel,Field
 from typing import Optional,List,Set
 from langgraph.checkpoint.postgres import PostgresSaver
-
-
 
 # ---- State Definition ----
 def add(left, right):
@@ -130,7 +129,6 @@ def extraction_node(state:AgentState):
     #i'm thinking  a date should be added to make composing text for each day easier for bulk composing
     print('Im now here \n\n\n\n\n\n')
         # a looop end#
-    print("Checkpointer type:", type(checkpointer))
     print('It was at extraction node')
     return {'extracted_commits':extracted_commits}
 
@@ -144,11 +142,9 @@ builder.add_node(extraction_node)
 builder.set_entry_point("receiver_node")
 builder.add_edge("receiver_node", "extraction_node")
 builder.add_edge("extraction_node",END)
-
-# we will be adding a postgresql checkpointer
+checkpointer = PostgresSaver(conn)
 graph = builder.compile(checkpointer=checkpointer)
 
-print("Checkpointer type:", type(checkpointer))
 # i'm going to add a node that accumulate the extracted commit to a particular stuff, then upload it to a postgres db
 # then it will reset the extracted_commit state to an empty list
 # before each runs, i need it to generate a thread id using the date, so how will it know when to generate a thread id

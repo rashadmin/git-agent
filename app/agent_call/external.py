@@ -3,7 +3,6 @@ from flask import jsonify,request,current_app
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.types import Command
 import pandas as pd
-from app.extensions import checkpointer
 # from app.agent_call.graph import graph
 import os
 from app import db
@@ -81,6 +80,7 @@ def get_all_commits(payload):
     state = graph.get_state(config=config).values
     extracted_commit = {i['commit_id'] for i in state.get('extracted_commits',[])}
     print('length of data',len(data))
+    print(data)
     if len(data)-1==len(extracted_commit):
         formatted = format_github_request(repo,after_commit)
     elif len(data)==len(extracted_commit):
