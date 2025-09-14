@@ -66,6 +66,8 @@ def get_all_commits(payload):
     while True:
         url = f"{GITHUB_API_URL}/repos/{repo}/commits?per_page=100&page={page}"
         response = requests.get(url)
+        print(url)
+        print(response.status_code)
         if response.status_code==200:
             datum = response.json()
 
