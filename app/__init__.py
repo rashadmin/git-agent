@@ -24,7 +24,7 @@ def create_app(config_class=Config):
         app.register_blueprint(api_bp, url_prefix='/api')
         from app.posting import bp as posting_bp
         app.register_blueprint(posting_bp, url_prefix='/posting')
-    engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'],connect_args={"sslmode": "require"})
     inspector = sa.inspect(engine)
     if not inspector.has_table("user"):
         with app.app_context():
