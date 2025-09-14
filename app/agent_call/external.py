@@ -66,7 +66,8 @@ def get_all_commits(payload):
     while True:
         url = f"{GITHUB_API_URL}/repos/{repo}/commits?per_page=100&page={page}"
         response = requests.get(url)
-        datum = response.json()
+        if response.status_code==200:
+            datum = response.json()
 
         if not datum:  # stop when no more commits
             break
