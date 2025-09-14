@@ -139,6 +139,8 @@ class Post(PaginatedAPIMixin,db.Model):
             '_links': {
                 'self': url_for('api.get_post', id=self.id),
                 'user':  url_for('api.get_user', username=user.username),
+                'post_linkedin':url_for('api.PostLinkedin', id=self.id),
+                'post_thread':url_for('api.PostThread', id=self.id),
                 'avatar': user.avatar(128)
             }
         }

@@ -7,7 +7,8 @@ import pandas as pd
 from app.agent_call.external import doy_to_date
 import time
 from app.api.auth import token_auth
-
+from app.posting.linkedin_post import post_linkedin
+from app.posting.twitter_post import post_thread
 @bp.route('/posts/<thread_id>/<date>', methods=['POST'])
 def create_posts(thread_id,date):
     from app.agent_call.graph import graph
@@ -58,3 +59,22 @@ def update_post(id):
     post.from_dict(data)
     db.session.commit()
     return jsonify(post.to_dict())
+
+
+@bp.route('posts/<id>/linkedin_post', methods=['POST'])
+def PostLinkedin(id):
+    post = Post.query.get_or_404(id)
+    post_linkedin(post.linkedin_post)
+    response = jsonify(post.to_dict())
+    response.status_code = 201
+    response.headers['Location'] = url_for('api.get_post', id=post.id)
+    return response
+
+@bp.route('posts/<id>/twitter_thread', methods=['POST'])
+def PostThread(id):
+    post = Post.query.get_or_404(id)
+    post_thread(post.linkedin_post)
+    response = jsonify(post.to_dict())
+    response.status_code = 201
+    response.headers['Location'] = url_for('api.get_post', id=post.id)
+    return response
