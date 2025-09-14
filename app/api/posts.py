@@ -73,7 +73,7 @@ def PostLinkedin(id):
 @bp.route('posts/<id>/twitter_thread', methods=['POST'])
 def PostThread(id):
     post = Post.query.get_or_404(id)
-    post_thread(post.linkedin_post)
+    post_thread(post.twitter_thread)
     response = jsonify(post.to_dict())
     response.status_code = 201
     response.headers['Location'] = url_for('api.get_post', id=post.id)
