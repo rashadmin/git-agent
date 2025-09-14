@@ -1,6 +1,7 @@
 import requests
 from requests_oauthlib import OAuth1
 from flask import jsonify,request,current_app
+import time
 # --- Step 1: Authenticate with your Twitter/X API credentials ---
 # You need Elevated Access from the Twitter/X developer portal
 
@@ -37,6 +38,7 @@ def post_thread(thread):
         })
         response.raise_for_status()
         tweet_id = response.json()["data"]["id"]
+        time.sleep(15)
 
     print("✅ Thread posted successfully!")
 

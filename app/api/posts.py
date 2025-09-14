@@ -7,6 +7,7 @@ import pandas as pd
 from app.agent_call.external import doy_to_date
 import time
 from app.api.auth import token_auth
+import json
 from app.posting.linkedin_post import post_linkedin
 from app.posting.twitter_post import post_thread
 @bp.route('/posts/<thread_id>/<date>', methods=['POST'])
@@ -73,7 +74,7 @@ def PostLinkedin(id):
 @bp.route('posts/<id>/twitter_thread', methods=['POST'])
 def PostThread(id):
     post = Post.query.get_or_404(id)
-    post_thread(post.twitter_thread)
+    post_thread(json.loads(post.twitter_thread)['tweets'])
     response = jsonify(post.to_dict())
     response.status_code = 201
     response.headers['Location'] = url_for('api.get_post', id=post.id)
