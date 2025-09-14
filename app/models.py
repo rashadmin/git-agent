@@ -122,9 +122,12 @@ class Post(PaginatedAPIMixin,db.Model):
     
     def to_dict(self):
         user = User.query.get_or_404(self.user_id)
+        ordered_post = Post.query.filter_by(repo=self.repo).order_by('date_committed').all()
+        entry = [post.id for post in ordered_post].index(self.id)+1
 
         data = {
             'id': self.id,
+            'entry':entry,
             'username': user.username,
             'first_name':user.firstname,
             'last_name':user.lastname,
