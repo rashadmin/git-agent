@@ -36,14 +36,15 @@ def adder(left,right):
         return left
     df = pd.DataFrame().from_records(left)
     df_updates = pd.DataFrame().from_records(right)
+    if df_updates.shape[0]>0:
     # Merge with updates (outer join keeps everything)
-    df = df.merge(df_updates, on=["commit_id", "filename"], how="outer", suffixes=("", "_new"))
+        df = df.merge(df_updates, on=["commit_id", "filename"], how="outer", suffixes=("", "_new"))
 
-    # If compiled_new exists, prefer it, else keep old compiled
-    df["compiled"] = df["compiled_new"].combine_first(df["compiled"])
+        # If compiled_new exists, prefer it, else keep old compiled
+        df["compiled"] = df["compiled_new"].combine_first(df["compiled"])
 
     # Drop the helper column
-    df = df.drop(columns=[col for col in df.columns if "new" in col])
+        df = df.drop(columns=[col for col in df.columns if "new" in col])
     left = df.to_dict(orient='records')
     return left
     
@@ -133,6 +134,7 @@ def extraction_node(state:AgentState):
     print('Im now here \n\n\n\n\n\n')
         # a looop end#
     print('It was at extraction node')
+    print(extracted_commits)
     return {'extracted_commits':extracted_commits}
 
 # it is in reverseeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for the extracted commit, earliest come last
