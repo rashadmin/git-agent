@@ -122,7 +122,6 @@ def extraction_node(state:AgentState):
         # temp_date = temp['commit_date'].dt.dayofyear
         commit_prompt = prompt_template.invoke({'text_string':temp_message.tolist()})#change from state to df slice
         print('Im here\n\n\n\n\n\n')
-        print(commit_prompt)
         structured_llm = llm.with_structured_output(schema=Repository)
         extracted_commit = structured_llm.invoke(commit_prompt)
         extracted_commit = [add_date(date,file) for file in extracted_commit.model_dump()['repository']]
@@ -134,7 +133,6 @@ def extraction_node(state:AgentState):
     print('Im now here \n\n\n\n\n\n')
         # a looop end#
     print('It was at extraction node')
-    print(extracted_commits)
     return {'extracted_commits':extracted_commits}
 
 # it is in reverseeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for the extracted commit, earliest come last

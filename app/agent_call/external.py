@@ -38,8 +38,6 @@ def format_github_request(repo,after_commit):
     # Fetch the latest contents of each file
     url = f"{GITHUB_API_URL}/repos/{repo}/commits/{after_commit}"
     r = requests.get(url, headers=headers)
-    print(r.status_code)
-    print('statsssssssss')
     if r.status_code == 200:
         data = r.json()
         commit_id = data['sha']
@@ -50,7 +48,6 @@ def format_github_request(repo,after_commit):
         changed_files = [commit_update(commit,commit_message,repo,commit_id) for commit in commits if (commit['filename'].find('/lib/') < 0 and commit['filename'].find('requirements.txt') < 0 and \
                         commit['filename'].find('/bin/') < 0 and commit['filename'].find('ipynb_checkpoints/') < 0 and commit['filename'].find('pycache') < 0 and commit['filename'].find('migrations') < 0)]
         changed_files = [f'No({index+1}) {commit}' for index,commit in enumerate(changed_files)]
-        print(changed_files)
         changed_files = [add_date(commit_date,commit) for commit in changed_files]
         return changed_files
 
@@ -65,13 +62,11 @@ def get_all_commits(payload):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     page = 1
     data =[]
-    # print(url)
     while True:
         url = f"{GITHUB_API_URL}/repos/{repo}/commits?per_page=100&page={page}"
         headers = {"Authorization": f"token {GITHUB_TOKEN}"}
         response = requests.get(url,headers=headers)
-        print(url)
-        print(response.status_code)
+
         if response.status_code!=200:
             break
         datum = response.json()
@@ -85,17 +80,16 @@ def get_all_commits(payload):
     thread_id = payload['repository']['full_name'].encode("utf-8").hex()
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
-    
+    formatted_commit = state.get('formatted_commits',[])
     extracted_commit = {i['commit_id'] for i in state.get('extracted_commits',[])}
-    print('length of data',len(data))
-    print(data)
-    if len(data)==len(extracted_commit):
+    if len(data) == len(formatted_commit):
+        formatted=[]
+    elif len(data)==len(extracted_commit):
         formatted=[]
     else:
         commit_ids = {commit['sha'] for commit in data}
         commit_ids.difference_update(extracted_commit)
         formatted = [format_github_request(repo,commit) for commit in commit_ids]
-    print('length of formatting',len(formatted))
     #receiving a nested list of dictionary, flatten  to a list of dictionary
     #convert to data frame, and sort by date, convert to list of dictionary and return as formatted 
     return formatted
