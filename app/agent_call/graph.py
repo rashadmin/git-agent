@@ -103,11 +103,11 @@ def extraction_node(state:AgentState):
     print('could be here \n\n\n\n\n\n')
     # print(state['formatted_commits'])
     df = pd.DataFrame().from_records(state['formatted_commits'])
-    # if df.shape[0]>
-    df["commit_id"] = df["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
     extracted_commits_df = pd.DataFrame().from_records(state.get('extracted_commits',[]))
     if extracted_commits_df.shape[0] > 0:
+        df["commit_id"] = df["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
         df = df[~df["commit_id"].isin(extracted_commits_df["commit_id"])]
+        df.drop('commit_id',axis=1,inplace=True)
     df['commit_date'] = pd.to_datetime(df['commit_date'])
     df.sort_values('commit_date',inplace=True)
     df['dayofyear'] = df['commit_date'].dt.dayofyear.astype(str)
