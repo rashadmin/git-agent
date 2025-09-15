@@ -80,14 +80,20 @@ def get_all_commits(payload):
     thread_id = payload['repository']['full_name'].encode("utf-8").hex()
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.get_state(config=config).values
-    formatted_commit = state.get('formatted_commits',[])
+    df = pd.DataFrame().from_records(state['formatted_commits'])
+    df["commit_id"] = df["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
+    commit_idx = df['commit_id'].unique().values()
     extracted_commit = {i['commit_id'] for i in state.get('extracted_commits',[])}
-    if len(data) == len(formatted_commit):
+    if len(data) == len(commit_idx):
         formatted=[]
+    elif len(data)>len(commit_idx):
+        formatted_commit = {commit for commit in commit_idx}
+        commit_ids = {commit['sha'] for commit in data}
+        commit_ids.difference_update(formatted_commit)
+        formatted = [format_github_request(repo,commit) for commit in commit_ids]
     elif len(data)==len(extracted_commit):
         formatted=[]
     else:
-        commit_ids = {commit['sha'] for commit in data}
         commit_ids.difference_update(extracted_commit)
         formatted = [format_github_request(repo,commit) for commit in commit_ids]
     #receiving a nested list of dictionary, flatten  to a list of dictionary
