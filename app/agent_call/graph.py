@@ -20,6 +20,8 @@ import os
 from pydantic import BaseModel,Field
 from typing import Optional,List,Set
 from langgraph.checkpoint.postgres import PostgresSaver
+from app import pool
+
 
 # ---- State Definition ----
 def add(left, right):

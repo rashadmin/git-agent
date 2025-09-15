@@ -4,6 +4,8 @@ from app.models import User,Post
 from app.agent_call.composer import run_compose
 app = create_app()
 
+
+
 @app.shell_context_processor
 def make_shell_context():
     return {'graph':graph,'user':User,'post':Post,'run':run_compose}

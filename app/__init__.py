@@ -5,10 +5,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 import sqlalchemy as sa
+from psycopg_pool import ConnectionPool
 
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
+pool = ConnectionPool("postgresql://git_agent_db_xocq_user:HRsa5HU2jL4y52lml80ZsmvG6dsjhlBF@dpg-d2r9j86r433s73fbnoa0-a.oregon-postgres.render.com/git_agent_db_xocq?sslmode=require", min_size=1, max_size=5)
 def create_app(config_class=Config):    
     app = Flask(__name__)
     app.config.from_object(config_class)
