@@ -103,6 +103,7 @@ def extraction_node(state:AgentState):
     print('could be here \n\n\n\n\n\n')
     # print(state['formatted_commits'])
     df = pd.DataFrame().from_records(state['formatted_commits'])
+    print(df.head())
     extracted_commits_df = pd.DataFrame().from_records(state.get('extracted_commits',[]))
     if extracted_commits_df.shape[0] > 0:
         df["commit_id"] = df["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
