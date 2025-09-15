@@ -82,7 +82,7 @@ def get_all_commits(payload):
     state = graph.get_state(config=config).values
     df = pd.DataFrame().from_records(state['formatted_commits'])
     df["commit_id"] = df["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
-    commit_idx = df['commit_id'].unique().values()
+    commit_idx = df['commit_id'].unique()
     extracted_commit = {i['commit_id'] for i in state.get('extracted_commits',[])}
     if len(data) == len(commit_idx):
         formatted=[]
