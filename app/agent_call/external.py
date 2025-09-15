@@ -65,7 +65,8 @@ def get_all_commits(payload):
     # print(url)
     while True:
         url = f"{GITHUB_API_URL}/repos/{repo}/commits?per_page=100&page={page}"
-        response = requests.get(url)
+        headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+        response = requests.get(url,headers=headers)
         print(url)
         print(response.status_code)
         if response.status_code==200:
