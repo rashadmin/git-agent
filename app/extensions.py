@@ -29,9 +29,12 @@ def fake_pipeline(conn):
 # Monkey patch psycopg Connection objects
 psycopg.Connection.pipeline = fake_pipeline
 
-# --- Create checkpointer with autocommit ---
-def connect():
-    return psycopg.connect(DB_URI, autocommit=True)
+# # --- Create checkpointer with autocommit ---
+# def connect():
+#     return psycopg.connect(DB_URI, autocommit=True)
+conn = psycopg.connect(DB_URI, autocommit=True)
 
-checkpointer = PostgresSaver(connect)
+# --- Pass the connection to PostgresSaver ---
+checkpointer = PostgresSaver(conn)
+# checkpointer = PostgresSaver(connect)
 
