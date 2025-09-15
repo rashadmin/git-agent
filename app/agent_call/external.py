@@ -54,7 +54,7 @@ def format_github_request(repo,after_commit):
     
 
 def get_all_commits(payload):
-    from app.agent_call.graph import graph
+    from app.agent_call.graph import get_graph
     repo = payload["repository"]["full_name"]   
     after_commit = payload["after"]            
     GITHUB_API_URL = "https://api.github.com"
@@ -81,7 +81,9 @@ def get_all_commits(payload):
 
     thread_id = payload['repository']['full_name'].encode("utf-8").hex()
     config = {"configurable": {"thread_id": thread_id}}
+    graph=get_graph()
     state = graph.get_state(config=config).values
+    
     extracted_commit = {i['commit_id'] for i in state.get('extracted_commits',[])}
     print('length of data',len(data))
     print(data)
@@ -99,16 +101,20 @@ def get_all_commits(payload):
     return formatted
 
 def text_composer(thread_id):
-    from app.agent_call.graph import graph
+    from app.agent_call.graph import get_graph
     config = {"configurable": {"thread_id": thread_id}}
+    graph = get_graph()
     state = graph.get_state(config=config).values
+    
     df = pd.DataFrame().from_records(state['extracted_commits'])
     df_unique_date= sorted(df['date'].unique())
     uncompiled_df = df[df['compiled']==False]
     unique_date = uncompiled_df['date'].unique()
     print(df['compiled'].value_counts())
     for date in sorted(unique_date):
+        graph = get_graph()
         state = graph.get_state(config=config).values
+        
         index = df_unique_date.index(date)
         #GET THE SUMMARY OF THE PREVIOUS COMMIT DATE:
         if index !=0:
@@ -127,9 +133,11 @@ def text_composer(thread_id):
          'date':date}
         df.loc[df['date']==date,'compiled'] = True
         extracted_commits = df.to_dict(orient='records')
+        graph = get_graph()
         graph.update_state(
         {"configurable": {"thread_id": thread_id}},
         {'extracted_commits':extracted_commits,'compiled_diary_list':[info]})  # marks it as if an agent updated the state
+        
         username = state['user_id']
         user_id = User.query.filter_by(username=username).first().id
         id = (username+info['repo']+date).encode("utf-8").hex()

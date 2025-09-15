@@ -5,7 +5,6 @@ from langgraph.types import Command
 from langgraph.runtime import Runtime
 from app.agent_call.external import format_github_request,get_all_commits
 from langgraph.checkpoint.memory import MemorySaver
-from app.extensions  import conn
 # import request
 from psycopg_pool import ConnectionPool
 import numpy as np
@@ -105,6 +104,7 @@ def extraction_node(state:AgentState):
     print('could be here \n\n\n\n\n\n')
     # print(state['formatted_commits'])
     df = pd.DataFrame().from_records(state['formatted_commits'])
+    # if df.shape[0]>
     df["commit_id"] = df["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
     extracted_commits_df = pd.DataFrame().from_records(state.get('extracted_commits',[]))
     if extracted_commits_df.shape[0] > 0:
@@ -147,8 +147,34 @@ builder.add_node(extraction_node)
 builder.set_entry_point("receiver_node")
 builder.add_edge("receiver_node", "extraction_node")
 builder.add_edge("extraction_node",END)
-checkpointer = PostgresSaver(conn)
-graph = builder.compile(checkpointer=checkpointer)
+
+# ---- Graph Factory ----
+from psycopg_pool import ConnectionPool
+
+# Initialize a connection pool once
+
+
+
+def get_graph():
+    from flask import g
+    if "graph" not in g:
+        # Store connection + graph in Flask's `g` for request scope
+        g.graph_context = pool.connection()
+        conn = g.graph_context.__enter__()
+        saver = PostgresSaver(conn)
+        g.graph = builder.compile(checkpointer=saver)
+    return g.graph
+
+def close_graph(e=None):
+    from flask import g
+    graph_context = g.pop("graph_context", None)
+    if graph_context is not None:
+        graph_context.__exit__(None, None, None)
+
+def init_app(app):
+    app.teardown_appcontext(close_graph)
+
+
 
 # i'm going to add a node that accumulate the extracted commit to a particular stuff, then upload it to a postgres db
 # then it will reset the extracted_commit state to an empty list

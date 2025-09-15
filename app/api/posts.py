@@ -12,10 +12,11 @@ from app.posting.linkedin_post import post_linkedin
 from app.posting.twitter_post import post_thread
 @bp.route('/posts/<thread_id>/<date>', methods=['POST'])
 def create_posts(thread_id,date):
-    from app.agent_call.graph import graph
+    from app.agent_call.graph import get_graph
     config = {"configurable": {"thread_id": str(thread_id)}}
     print(type(thread_id))
     # time.sleep(1)
+    graph = get_graph()
     state = graph.get_state(config=config).values
     username = 'rashadmin'#state['user_id']
     user_id = User.query.filter_by(username=username).first_or_404().id
