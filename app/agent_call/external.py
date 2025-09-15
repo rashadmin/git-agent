@@ -38,6 +38,8 @@ def format_github_request(repo,after_commit):
     # Fetch the latest contents of each file
     url = f"{GITHUB_API_URL}/repos/{repo}/commits/{after_commit}"
     r = requests.get(url, headers=headers)
+    print(r.status_code)
+    print('statsssssssss')
     if r.status_code == 200:
         data = r.json()
         commit_id = data['sha']
