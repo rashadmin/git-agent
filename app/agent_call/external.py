@@ -50,6 +50,7 @@ def format_github_request(repo,after_commit):
         changed_files = [commit_update(commit,commit_message,repo,commit_id) for commit in commits if (commit['filename'].find('/lib/') < 0 and commit['filename'].find('requirements.txt') < 0 and \
                         commit['filename'].find('/bin/') < 0 and commit['filename'].find('ipynb_checkpoints/') < 0 and commit['filename'].find('pycache') < 0 and commit['filename'].find('migrations') < 0)]
         changed_files = [f'No({index+1}) {commit}' for index,commit in enumerate(changed_files)]
+        print(changed_files)
         changed_files = [add_date(commit_date,commit) for commit in changed_files]
         return changed_files
 
