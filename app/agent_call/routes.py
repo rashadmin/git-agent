@@ -68,7 +68,7 @@ def compose_text():
     for thread_id in today_thread_id:
         text_composer(thread_id)
         repo = bytes.fromhex(thread_id).decode("utf-8")
-        date_in_db = execute_query(f"SELECT date_committed FROM post where repo ='{repo}'")
+        date_in_db = cur.execute(f"SELECT date_committed FROM post where repo ='{repo}'")
         config = {"configurable": {"thread_id": thread_id}}
         state = graph.get_state(config=config).values
         df = pd.DataFrame().from_records(state['compiled_diary_list'])

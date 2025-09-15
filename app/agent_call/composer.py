@@ -23,7 +23,7 @@ class ComposeState(TypedDict):
 summary_prompt = ChatPromptTemplate([("system",
                 "You are an assistant that writes daily coding summaries."
                 "Input: A list of commit logs containing commit messages and details of additions, deletions, or modifications."
-                "Task: Summarize these commits in plain English as if you were a developer recounting what was done. for day {Day}" 
+                "Task: Summarize (under 280 characters) these commits in plain English as if you were a developer recounting what was done. for day {Day}" 
                 "Focus on intent (bug fixes, feature additions, refactoring, experiments), not raw numbers." 
                 "Do not use bullet points or lists. "
                 "Yesterday's summary: {previous_summary}"
@@ -36,6 +36,7 @@ twitter_prompt = ChatPromptTemplate([("system",
                                       ("You are an assistant that writes Twitter threads." 
                                       " Input: A daily summary of coding work."
                                       "Task: Write a thread of tweets (each under 280 characters) that tell a story of what was done. "
+                                      "Using an informative,conversational and approachable tone"
                                       "- Start with a strong hook in Tweet 1."
                                       "- Follow with short, engaging updates explaining progress."
                                       " - End with a closing reflection or teaser."
@@ -56,7 +57,7 @@ linkedin_prompt = ChatPromptTemplate([("system",
                                         ("You are an assistant that writes professional LinkedIn updates." 
                                         "Input: A daily coding summary."
                                         "Task: Write a LinkedIn post describing what was achieved, highlighting the skills, tools, or lessons learned. "
-                                        "Use a professional but approachable tone." 
+                                        "Use a professional yet informative, conversational and approachable tone." 
                                         "Do not use hashtags, lists, or emojis. "
                                         "Write in clear paragraphs, as if sharing progress with your professional network."
                                         "Summary:")),('human',"Summary: {summary}")])
