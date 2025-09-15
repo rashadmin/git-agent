@@ -12,7 +12,6 @@ from langgraph.types import Command
 import pandas as pd
 from app.models import User,Post
 from app import db
-from app.extensions import execute_query
 from app.agent_call.external import doy_to_date
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)

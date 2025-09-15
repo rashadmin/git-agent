@@ -20,7 +20,7 @@ from pydantic import BaseModel,Field
 from typing import Optional,List,Set
 from langgraph.checkpoint.postgres import PostgresSaver
 
-from app.extensions import get_checkpointer
+from app.extensions import checkpointer
 # ---- State Definition ----
 def add(left, right):
     if right == "__RESET__":
@@ -146,7 +146,6 @@ builder.add_node(extraction_node)
 builder.set_entry_point("receiver_node")
 builder.add_edge("receiver_node", "extraction_node")
 builder.add_edge("extraction_node",END)
-checkpointer = get_checkpointer()
 graph = builder.compile(checkpointer=checkpointer)
 # ---- Graph Factory ----
 
