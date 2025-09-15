@@ -1,18 +1,18 @@
 from flask import Flask, request, jsonify
-from app.agent_call.graph import get_graph
+from app.agent_call.graph import graph
 from app.agent_call.external import format_github_request,text_composer
 import threading
 import time
 import requests
 import psycopg
 from flask import jsonify,request,current_app
-
 from app.agent_call import bp
 from datetime import datetime,timedelta
 from langgraph.types import Command
 import pandas as pd
 from app.models import User,Post
 from app import db
+from app.extensions import execute_query
 from app.agent_call.external import doy_to_date
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
@@ -45,7 +45,6 @@ def run_agent():
     username = data["repository"]["full_name"].split('/')[0]
     print('yhhhhhhhhhhhhhhhhhhhhhh\n\n\n\n\n\n\n\n')
     config = {"configurable": {"thread_id": thread_id}}
-    graph= get_graph()
     graph.invoke({'commits':data,'user_id':username},config=config)
     # user_input = data.get("message")
     # thread_id = data.get("thread_id", "default")
@@ -70,12 +69,9 @@ def compose_text():
     for thread_id in today_thread_id:
         text_composer(thread_id)
         repo = bytes.fromhex(thread_id).decode("utf-8")
-        cur.execute(f"SELECT date_committed FROM post where repo ='{repo}'")
+        date_in_db = execute_query(f"SELECT date_committed FROM post where repo ='{repo}'")
         config = {"configurable": {"thread_id": thread_id}}
-        graph= get_graph()
         state = graph.get_state(config=config).values
-
-        date_in_db = cur.fetchall()
         df = pd.DataFrame().from_records(state['compiled_diary_list'])
         date_in_diary = df['date'].str.split('-',expand=True).rename(columns={0:'year',1:'dayofyear'})
         date_in_diary_val = date_in_diary.apply(yday_to_date, axis=1).values

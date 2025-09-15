@@ -19,9 +19,8 @@ import os
 from pydantic import BaseModel,Field
 from typing import Optional,List,Set
 from langgraph.checkpoint.postgres import PostgresSaver
-from app import pool
 
-
+from app.extensions import get_checkpointer
 # ---- State Definition ----
 def add(left, right):
     if right == "__RESET__":
@@ -147,32 +146,10 @@ builder.add_node(extraction_node)
 builder.set_entry_point("receiver_node")
 builder.add_edge("receiver_node", "extraction_node")
 builder.add_edge("extraction_node",END)
-
+checkpointer = get_checkpointer()
+graph = builder.compile(checkpointer=checkpointer)
 # ---- Graph Factory ----
-from psycopg_pool import ConnectionPool
 
-# Initialize a connection pool once
-
-
-
-def get_graph():
-    from flask import g
-    if "graph" not in g:
-        # Store connection + graph in Flask's `g` for request scope
-        g.graph_context = pool.connection()
-        conn = g.graph_context.__enter__()
-        saver = PostgresSaver(conn)
-        g.graph = builder.compile(checkpointer=saver)
-    return g.graph
-
-def close_graph(e=None):
-    from flask import g
-    graph_context = g.pop("graph_context", None)
-    if graph_context is not None:
-        graph_context.__exit__(None, None, None)
-
-def init_app(app):
-    app.teardown_appcontext(close_graph)
 
 
 
