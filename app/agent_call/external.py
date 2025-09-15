@@ -86,9 +86,7 @@ def get_all_commits(payload):
     extracted_commit = {i['commit_id'] for i in state.get('extracted_commits',[])}
     print('length of data',len(data))
     print(data)
-    if len(data)-1==len(extracted_commit):
-        formatted = format_github_request(repo,after_commit)
-    elif len(data)==len(extracted_commit):
+    if len(data)==len(extracted_commit):
         formatted=[]
     else:
         commit_ids = {commit['sha'] for commit in data}
