@@ -1,4 +1,4 @@
-from flask import jsonify,request,url_for
+from flask import jsonify,request,url_for,current_app
 from app.models import Post,User
 from app.api import bp
 from app.api.errors import bad_request
@@ -12,11 +12,13 @@ from app.posting.linkedin_post import post_linkedin
 from app.posting.twitter_post import post_thread
 @bp.route('/posts/<thread_id>/<date>', methods=['POST'])
 def create_posts(thread_id,date):
-    from app.agent_call.graph import graph
+    from app.extensions import graph_context
     config = {"configurable": {"thread_id": str(thread_id)}}
     print(type(thread_id))
     # time.sleep(1)
-    state = graph.get_state(config=config).values
+    DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
+    with graph_context(DB_URI) as graph:
+        state = graph.get_state(config=config).values
     username = 'rashadmin'#state['user_id']
     user_id = User.query.filter_by(username=username).first_or_404().id
     if user_id is None:

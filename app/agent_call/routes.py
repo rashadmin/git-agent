@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-from app.agent_call.graph import graph
 from app.agent_call.external import format_github_request,text_composer
 import threading
 import time
@@ -13,6 +12,7 @@ import pandas as pd
 from app.models import User,Post
 from app import db
 from app.agent_call.external import doy_to_date
+from app.extensions import graph_context
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
 # listener_thread.start()
@@ -45,7 +45,9 @@ def run_agent():
     username = data["repository"]["full_name"].split('/')[0]
     print('yhhhhhhhhhhhhhhhhhhhhhh\n\n\n\n\n\n\n\n')
     config = {"configurable": {"thread_id": thread_id}}
-    graph.invoke({'commits':data,'user_id':username},config=config)
+    DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
+    with graph_context(DB_URI) as graph:
+        graph.invoke({'commits':data,'user_id':username},config=config)
     # user_input = data.get("message")
     # thread_id = data.get("thread_id", "default")
     # active_thread_id = thread_id
@@ -71,7 +73,9 @@ def compose_text():
         repo = bytes.fromhex(thread_id).decode("utf-8")
         date_in_db = cur.execute(f"SELECT date_committed FROM post where repo ='{repo}'")
         config = {"configurable": {"thread_id": thread_id}}
-        state = graph.get_state(config=config).values
+        DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
+        with graph_context(DB_URI) as graph:
+            state = graph.get_state(config=config).values
         df = pd.DataFrame().from_records(state['compiled_diary_list'])
         date_in_diary = df['date'].str.split('-',expand=True).rename(columns={0:'year',1:'dayofyear'})
         date_in_diary_val = date_in_diary.apply(yday_to_date, axis=1).values
@@ -92,7 +96,7 @@ def compose_text():
                 db.session.add(post)
                 db.session.commit()
         #convert the date in the diary list to an actual date, check if it is in db, if not, add it to it
-
+    conn.close()
 
     return 'DONE'
     # return state.values['extracted_commits']
