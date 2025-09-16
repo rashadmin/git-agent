@@ -19,12 +19,13 @@ from psycopg.rows import dict_row
 
 from flask import current_app
 DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
-pool = ConnectionPool(DB_URI, open=True, max_size=5,kwargs={"prepare_threshold": 0, "row_factory": dict_row, 'autocommit':True})
+pool = ConnectionPool(DB_URI, open=True, max_size=5,kwargs={"prepare_threshold": None, "row_factory": dict_row, 'autocommit':True})
 @contextmanager
 def graph_context():
     from app.agent_call.graph import builder # adjust imports
     # conn = psycopg.connect(db_uri, autocommit=True,prepare_threshold=0)
     with pool.connection() as conn:
+        conn.prepare_threshold = None
         # with conn.cursor() as cur:
         #     cur.execute("DEALLOCATE ALL;")
         checkpointer = PostgresSaver(conn)
