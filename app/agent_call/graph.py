@@ -19,6 +19,7 @@ import os
 from pydantic import BaseModel,Field
 from typing import Optional,List,Set
 from langgraph.checkpoint.postgres import PostgresSaver
+from app.extensions import graph_context
 
 # ---- State Definition ----
 def add(left, right):
@@ -125,8 +126,12 @@ def extraction_node(state:AgentState):
         extracted_commit = structured_llm.invoke(commit_prompt)
         extracted_commit = [add_date(date,file) for file in extracted_commit.model_dump()['repository']]
         # extracted_commits.extend(extracted_commit)
-        yield {'extracted_commits':extracted_commit}
-
+        DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
+        thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
+        with graph_context(DB_URI) as graph:
+            graph.update_state(
+            {"configurable": {"thread_id": thread_id}},
+            {'extracted_commits':extracted_commit})
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
     # a looop start#
