@@ -115,6 +115,8 @@ def extraction_node(state:AgentState):
     df['day'] = df['year']+'-'+df['dayofyear']
     df.drop(['dayofyear','year'],axis=1,inplace=True)
     unique_commit_date = df['day'].unique()
+    print('unique commit')
+    print(unique_commit_date)
     for date in unique_commit_date:
         temp = df[df['day']==date]
         temp_message = temp['message']
@@ -128,6 +130,7 @@ def extraction_node(state:AgentState):
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
         from app.extensions import graph_context
+        print(extracted_commits)
         with graph_context(DB_URI) as graph:
             graph.update_state(
             {"configurable": {"thread_id": thread_id}},
