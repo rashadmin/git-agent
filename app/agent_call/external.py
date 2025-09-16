@@ -90,11 +90,14 @@ def get_all_commits(payload):
         formatted_commit = {commit for commit in commit_idx}
         commit_ids = {commit['sha'] for commit in data}
         commit_ids.difference_update(formatted_commit)
+        print(commit_ids)
         formatted = [format_github_request(repo,commit) for commit in commit_ids]
     elif len(data)==len(extracted_commit):
         formatted=[]
     else:
+        commit_ids = {commit['sha'] for commit in data}
         commit_ids.difference_update(extracted_commit)
+        print(commit_ids)
         formatted = [format_github_request(repo,commit) for commit in commit_ids]
     #receiving a nested list of dictionary, flatten  to a list of dictionary
     #convert to data frame, and sort by date, convert to list of dictionary and return as formatted 
