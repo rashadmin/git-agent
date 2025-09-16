@@ -78,7 +78,7 @@ prompt_template = ChatPromptTemplate([('system',
     "to. Also we can also get the number of addition,deletion from the no of addition, deletion"
     "A commit message will be specified which describe what commit was made, a brief description about what the commit is about."
     "The patch - is the main information body we will be using to get this information, "
-    "Your job is to extract a list of key summary point of what happened in each patch given for each file. Make it detailed yet concise, that mean it should contain keywords"
+    "Your job is to extract a list of key summary (under 200 characters or less) point of what happened in each patch given for each file. Make it detailed yet concise, that mean it should contain keywords"
     "that can be used to generate a report about the changes that occured in this file. The below is the text string : "
                         ),
     ('human','{text_string}')])
@@ -130,7 +130,7 @@ def extraction_node(state:AgentState):
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
         from app.extensions import graph_context
-        print(extracted_commits)
+        print(extracted_commit)
         with graph_context(DB_URI) as graph:
             graph.update_state(
             {"configurable": {"thread_id": thread_id}},
@@ -164,3 +164,17 @@ builder.add_edge("extraction_node",END)
 # then it will reset the extracted_commit state to an empty list
 # before each runs, i need it to generate a thread id using the date, so how will it know when to generate a thread id
 # it checks if the extracted_commit state is empty
+
+
+extracted_commits_df = pd.DataFrame().from_records(state.get('extracted_commits',[]))
+if extracted_commits_df.shape[0] > 0:
+    a["commit_id"] = a["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
+    a = a[~a["commit_id"].isin(extracted_commits_df["commit_id"])]
+    a.drop('commit_id',axis=1,inplace=True)
+a['commit_date'] = pd.to_datetime(a['commit_date'])
+a.sort_values('commit_date',inplace=True)
+a['dayofyear'] = a['commit_date'].dt.dayofyear.astype(str)
+a['year'] = a['commit_date'].dt.year.astype(str)
+a['day'] = a['year']+'-'+a['dayofyear']
+a.drop(['dayofyear','year'],axis=1,inplace=True)
+unique_commit_date = a['day'].unique()
