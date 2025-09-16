@@ -13,16 +13,24 @@ import psycopg
 # app/extensions.py
 import psycopg
 from contextlib import contextmanager
-from app.agent_call.graph import builder # adjust imports
+from psycopg_pool import ConnectionPool
 
+from app.agent_call.graph import builder # adjust imports
+from flask import current_app
+DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
+pool = ConnectionPool(DB_URI, open=True, max_size=5)
 @contextmanager
-def graph_context(db_uri: str):
-    conn = psycopg.connect(db_uri, autocommit=True,prepare_threshold=0)
-    try:
+def graph_context():
+    # conn = psycopg.connect(db_uri, autocommit=True,prepare_threshold=0)
+    with pool.connection() as conn:
         checkpointer = PostgresSaver(conn)
         graph = builder.compile(checkpointer=checkpointer)
-        print('Started')
         yield graph
-    finally:
-        conn.close()
-        print('Closed')
+    # try:
+    #     checkpointer = PostgresSaver(conn)
+    #     graph = builder.compile(checkpointer=checkpointer)
+    #     print('Started')
+    #     yield graph
+    # finally:
+    #     conn.close()
+    #     print('Closed')

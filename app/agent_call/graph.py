@@ -131,7 +131,7 @@ def extraction_node(state:AgentState):
         thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
         from app.extensions import graph_context
         print(extracted_commit)
-        with graph_context(DB_URI) as graph:
+        with graph_context() as graph:
             graph.update_state(
             {"configurable": {"thread_id": thread_id}},
             {'extracted_commits':extracted_commit})

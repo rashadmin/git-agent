@@ -49,10 +49,8 @@ def run_agent():
     print('yhhhhhhhhhhhhhhhhhhhhhh\n\n\n\n\n\n\n\n')
     config = {"configurable": {"thread_id": thread_id}}
     DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-    conn = psycopg.connect(DB_URI, autocommit=True)
-    checkpointer = PostgresSaver(conn)
-    graph = builder.compile(checkpointer=checkpointer)
-    graph.invoke({'commits':data,'user_id':username},config=config)
+    with graph_context() as graph:
+        graph.invoke({'commits':data,'user_id':username},config=config)
     # user_input = data.get("message")
     # thread_id = data.get("thread_id", "default")
     # active_thread_id = thread_id
@@ -79,7 +77,7 @@ def compose_text():
         date_in_db = cur.execute(f"SELECT date_committed FROM post where repo ='{repo}'")
         config = {"configurable": {"thread_id": thread_id}}
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-        with graph_context(DB_URI) as graph:
+        with graph_context() as graph:
             state = graph.get_state(config=config).values
         df = pd.DataFrame().from_records(state['compiled_diary_list'])
         date_in_diary = df['date'].str.split('-',expand=True).rename(columns={0:'year',1:'dayofyear'})

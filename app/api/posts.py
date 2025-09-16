@@ -17,7 +17,7 @@ def create_posts(thread_id,date):
     print(type(thread_id))
     # time.sleep(1)
     DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-    with graph_context(DB_URI) as graph:
+    with graph_context() as graph:
         state = graph.get_state(config=config).values
     username = 'rashadmin'#state['user_id']
     user_id = User.query.filter_by(username=username).first_or_404().id
