@@ -21,6 +21,8 @@ def graph_context(db_uri: str):
     try:
         checkpointer = PostgresSaver(conn)
         graph = builder.compile(checkpointer=checkpointer)
+        print('Started')
         yield graph
     finally:
         conn.close()
+        print('Closed')
