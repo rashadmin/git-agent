@@ -19,7 +19,7 @@ from psycopg.rows import dict_row
 
 from flask import current_app
 DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
-pool = ConnectionPool(DB_URI, open=True,max_idle=60,max_lifetime=300,max_size=20,kwargs={"prepare_threshold": None, "row_factory": dict_row, 'autocommit':True})
+pool = ConnectionPool(DB_URI, open=True,max_idle=60,max_lifetime=300,max_size=15,kwargs={"prepare_threshold": None, "row_factory": dict_row, 'autocommit':True})
 @contextmanager
 def graph_context():
     from app.agent_call.graph import builder # adjust imports
