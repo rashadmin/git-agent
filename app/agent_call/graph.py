@@ -155,7 +155,7 @@ builder.add_node(extraction_node)
 builder.set_entry_point("receiver_node")
 builder.add_edge("receiver_node", "extraction_node")
 builder.add_edge("extraction_node",END)
-DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require"
+DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require"
 
 conn = psycopg.connect(DB_URI, autocommit=True)
 
