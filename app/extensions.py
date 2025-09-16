@@ -17,7 +17,7 @@ from app.agent_call.graph import builder # adjust imports
 
 @contextmanager
 def graph_context(db_uri: str):
-    conn = psycopg.connect(db_uri, autocommit=True)
+    conn = psycopg.connect(db_uri, autocommit=True,prepare_threshold=0)
     try:
         checkpointer = PostgresSaver(conn)
         graph = builder.compile(checkpointer=checkpointer)
