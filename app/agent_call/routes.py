@@ -39,6 +39,7 @@ def run_agent():
     # print(event)
     if event != "push":
         return jsonify({"msg": "Not a push event"}), 200
+    print('hereeeeeeeee')
     data = request.json
     thread_id = data['repository']['full_name'].encode("utf-8").hex()
     username = data["repository"]["full_name"].split('/')[0]
