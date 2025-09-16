@@ -18,6 +18,7 @@ from langchain.chat_models import init_chat_model
 import os
 from pydantic import BaseModel,Field
 from typing import Optional,List,Set
+from app.extensions import pool
 from langgraph.checkpoint.postgres import PostgresSaver
 
 # ---- State Definition ----
@@ -154,7 +155,8 @@ builder.add_node(extraction_node)
 builder.set_entry_point("receiver_node")
 builder.add_edge("receiver_node", "extraction_node")
 builder.add_edge("extraction_node",END)
-
+checkpointer = PostgresSaver(pool.connection())
+graph = builder.compile(checkpointer=checkpointer)
 # ---- Graph Factory ----
 
 
