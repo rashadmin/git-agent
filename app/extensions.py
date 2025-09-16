@@ -24,6 +24,7 @@ pool = ConnectionPool(DB_URI, open=True, min_size=1,max_size=10,max_idle=60,kwar
 def graph_context():
     # conn = psycopg.connect(db_uri, autocommit=True,prepare_threshold=0)
     with pool.connection() as conn:
+        conn.prepare_threshold = None   # 👈 disables psycopg auto-prep entirely
         with conn.cursor() as cur:
             cur.execute("DEALLOCATE ALL;")
         checkpointer = PostgresSaver(conn)
