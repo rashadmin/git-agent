@@ -14,18 +14,26 @@ import psycopg
 import psycopg
 from contextlib import contextmanager
 from psycopg_pool import ConnectionPool
+from psycopg.rows import dict_row
 
 from app.agent_call.graph import builder # adjust imports
 from flask import current_app
 DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
-pool = ConnectionPool(DB_URI, open=True, max_size=5)
+pool = ConnectionPool(DB_URI, open=True, min_size=1,max_size=10,max_idle=60,kwargs={"prepare_threshold": 0, "row_factory": dict_row})
 @contextmanager
 def graph_context():
     # conn = psycopg.connect(db_uri, autocommit=True,prepare_threshold=0)
     with pool.connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DEALLOCATE ALL;")
         checkpointer = PostgresSaver(conn)
         graph = builder.compile(checkpointer=checkpointer)
-        yield graph
+        # yield graph
+        print("Started")
+        try:
+            yield graph
+        finally:
+            print("Closed (conn returned to pool)")
     # try:
     #     checkpointer = PostgresSaver(conn)
     #     graph = builder.compile(checkpointer=checkpointer)
