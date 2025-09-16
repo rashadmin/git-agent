@@ -14,20 +14,22 @@ DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-n
 from langgraph.checkpoint.postgres import PostgresSaver
 import psycopg
 
-
 class HealthyPostgresSaver(PostgresSaver):
     def __init__(self, db_uri: str):
         self.db_uri = db_uri
-        self.conn = psycopg.connect(db_uri, autocommit=True)
+        self.conn = None  # don’t connect yet
 
     def _ensure_connection(self):
+        if self.conn is None or self.conn.closed:
+            self.conn = psycopg.connect(self.db_uri, autocommit=True)
+
         try:
             with self.conn.cursor() as cur:
                 cur.execute("SELECT 1;")
                 cur.fetchone()
         except psycopg.OperationalError:
-            # reconnect
-            self.conn.close()
+            if self.conn is not None:
+                self.conn.close()
             self.conn = psycopg.connect(self.db_uri, autocommit=True)
 
     def get_tuple(self, config):
