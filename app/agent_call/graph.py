@@ -166,15 +166,3 @@ builder.add_edge("extraction_node",END)
 # it checks if the extracted_commit state is empty
 
 
-extracted_commits_df = pd.DataFrame().from_records(state.get('extracted_commits',[]))
-if extracted_commits_df.shape[0] > 0:
-    a["commit_id"] = a["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
-    a = a[~a["commit_id"].isin(extracted_commits_df["commit_id"])]
-    a.drop('commit_id',axis=1,inplace=True)
-a['commit_date'] = pd.to_datetime(a['commit_date'])
-a.sort_values('commit_date',inplace=True)
-a['dayofyear'] = a['commit_date'].dt.dayofyear.astype(str)
-a['year'] = a['commit_date'].dt.year.astype(str)
-a['day'] = a['year']+'-'+a['dayofyear']
-a.drop(['dayofyear','year'],axis=1,inplace=True)
-unique_commit_date = a['day'].unique()
