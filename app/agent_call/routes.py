@@ -13,6 +13,9 @@ from app.models import User,Post
 from app import db
 from app.agent_call.external import doy_to_date
 from app.extensions import graph_context
+from app.agent_call.graph import builder
+from langgraph.checkpoint.postgres import PostgresSaver
+import psycopg
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
 # listener_thread.start()
@@ -46,8 +49,10 @@ def run_agent():
     print('yhhhhhhhhhhhhhhhhhhhhhh\n\n\n\n\n\n\n\n')
     config = {"configurable": {"thread_id": thread_id}}
     DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-    with graph_context(DB_URI) as graph:
-        graph.invoke({'commits':data,'user_id':username},config=config)
+    conn = psycopg.connect(DB_URI, autocommit=True)
+    checkpointer = PostgresSaver(conn)
+    graph = builder.compile(checkpointer=checkpointer)
+    graph.invoke({'commits':data,'user_id':username},config=config)
     # user_input = data.get("message")
     # thread_id = data.get("thread_id", "default")
     # active_thread_id = thread_id
