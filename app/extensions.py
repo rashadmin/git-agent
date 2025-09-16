@@ -11,17 +11,33 @@ DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-n
 # checkpointer = PostgresSaver(conn)
 # # checkpointer.setup()  # make sure schema exists
 # # app/extensions.py
-from langgraph.checkpoint.postgres import PostgresSaver
+import time
 import psycopg
+from langgraph.checkpoint.postgres import PostgresSaver
 
 class HealthyPostgresSaver(PostgresSaver):
-    def __init__(self, db_uri: str):
+    def __init__(self, db_uri: str, max_retries: int = 5, backoff: float = 2.0):
         self.db_uri = db_uri
-        self.conn = None  # don’t connect yet
+        self.conn = None
+        self.max_retries = max_retries
+        self.backoff = backoff  # seconds (exponential base)
+
+    def _connect(self):
+        """Try to connect with retries and exponential backoff."""
+        delay = self.backoff
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                return psycopg.connect(self.db_uri, autocommit=True)
+            except psycopg.OperationalError as e:
+                if attempt == self.max_retries:
+                    raise
+                print(f"[DB] Connection attempt {attempt} failed: {e}. Retrying in {delay}s...")
+                time.sleep(delay)
+                delay *= 2  # exponential backoff
 
     def _ensure_connection(self):
         if self.conn is None or self.conn.closed:
-            self.conn = psycopg.connect(self.db_uri, autocommit=True)
+            self.conn = self._connect()
 
         try:
             with self.conn.cursor() as cur:
@@ -30,7 +46,7 @@ class HealthyPostgresSaver(PostgresSaver):
         except psycopg.OperationalError:
             if self.conn is not None:
                 self.conn.close()
-            self.conn = psycopg.connect(self.db_uri, autocommit=True)
+            self.conn = self._connect()
 
     def get_tuple(self, config):
         self._ensure_connection()
@@ -39,6 +55,7 @@ class HealthyPostgresSaver(PostgresSaver):
     def put_tuple(self, config, value):
         self._ensure_connection()
         return super().put_tuple(config, value)
+
 
 # use this instead
 checkpointer = HealthyPostgresSaver(DB_URI)
