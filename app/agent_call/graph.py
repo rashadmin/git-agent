@@ -96,7 +96,7 @@ def receiver_node(state:AgentState):
     formatted = [item for sublist in formatted for item in sublist]
     return {'formatted_commits':formatted}
 
-def extraction_node(state:AgentState,config):
+def extraction_node(state:AgentState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     extracted_commits = []
@@ -130,19 +130,19 @@ def extraction_node(state:AgentState,config):
         # extracted_commits.extend(extracted_commit)
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
-        print(date)
+        from app.extensions import graph_context
+        print(extracted_commit)
         import logging
 
         logging.basicConfig(level=logging.INFO)
-        # graph = config["configurable"]["graph"]
-        logging.info(f"[POOL] acquired  open={pool.get_stats()}")
-        with pool.connection() as connect:
-            saver = PostgresSaver(connect)
-            temp_graph = builder.compile(checkpointer=saver)
-            temp_graph.update_state(
+        with graph_context() as graph:
+            logging.info(f"[BEFORE update_state] {pool.get_stats()}")
+            print('line 136')
+            graph.update_state(
             {"configurable": {"thread_id": thread_id}},
             {'extracted_commits':extracted_commit})
-            logging.info(f"[POOL] released connect={id(connect)} open={pool.get_stats()}")
+            graph.checkpointer.conn.close()
+        logging.info(f"[AFTER update_state] {pool.get_stats()}")
 
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
