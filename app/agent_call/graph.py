@@ -96,7 +96,7 @@ def receiver_node(state:AgentState):
     formatted = [item for sublist in formatted for item in sublist]
     return {'formatted_commits':formatted}
 
-def extraction_node(state:AgentState):
+def extraction_node(state:AgentState,config):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
     extracted_commits = []
@@ -128,11 +128,14 @@ def extraction_node(state:AgentState):
         extracted_commit = structured_llm.invoke(commit_prompt)
         extracted_commit = [add_date(date,file) for file in extracted_commit.model_dump()['repository']]
         # extracted_commits.extend(extracted_commit)
-        # DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-        # thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
-        # from app.extensions import graph_context
-        print(extracted_commit)
-        extracted_commits.extend(extracted_commit)
+        DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
+        thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
+        print(date)
+        graph = config["configurable"]["graph"]
+
+        graph.update_state(
+            {"configurable": {"thread_id": thread_id}},
+            {'extracted_commits':extracted_commit})
 
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
