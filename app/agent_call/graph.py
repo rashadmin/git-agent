@@ -105,7 +105,8 @@ def extraction_node(state:AgentState):
     df = pd.DataFrame().from_records(state['formatted_commits'])
     print(df.head())
     extracted_commits_df = pd.DataFrame().from_records(state.get('extracted_commits',[]))
-    if extracted_commits_df.shape[0] > 0:
+    # if extracted_commits_df.shape[0] > 0:
+    if False:
         df["commit_id"] = df["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
         df = df[~df["commit_id"].isin(extracted_commits_df["commit_id"])]
         df.drop('commit_id',axis=1,inplace=True)
