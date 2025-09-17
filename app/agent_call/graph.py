@@ -134,9 +134,9 @@ def extraction_node(state:AgentState,config):
         import logging
 
         logging.basicConfig(level=logging.INFO)
-        logging.info(f"[POOL] acquired conn={id(conn)} open={pool.get_stats()}")
         # graph = config["configurable"]["graph"]
         with pool.connection() as conn:
+            logging.info(f"[POOL] acquired conn={id(conn)} open={pool.get_stats()}")
             saver = PostgresSaver(conn)
             temp_graph = builder.compile(checkpointer=saver)
             temp_graph.update_state(
