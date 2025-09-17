@@ -23,19 +23,20 @@ from flask import current_app
 DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
 pool = ConnectionPool(DB_URI, open=True,max_idle=60,max_lifetime=300,max_size=15,kwargs={"prepare_threshold": None, "row_factory": dict_row, 'autocommit':True})
 
-
 @contextmanager
 def graph_context():
     logging.info("[POOL] Waiting for connection...")
+    from app.agent_call.graph import builder
     with pool.connection() as conn:
-        logging.info(f"[POOL] Connection acquired: {id(conn)}")
+        logging.info(f"[POOL] acquired conn={id(conn)} | status: {pool.status()}")
         try:
-            from app.agent_call.graph import builder
+            conn.prepare_threshold = None
             checkpointer = PostgresSaver(conn)
             graph = builder.compile(checkpointer=checkpointer)
             yield graph
         finally:
-            logging.info(f"[POOL] Connection released: {id(conn)}")
+            logging.info(f"[POOL] released conn={id(conn)} | status: {pool.status()}")
+
     # try:
     #     checkpointer = PostgresSaver(conn)
     #     graph = builder.compile(checkpointer=checkpointer)

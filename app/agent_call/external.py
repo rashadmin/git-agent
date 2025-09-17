@@ -81,6 +81,7 @@ def get_all_commits(payload):
     config = {"configurable": {"thread_id": thread_id}}
     DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
     with graph_context() as graph:
+        print('line 82')
         state = graph.get_state(config=config).values
     df = pd.DataFrame().from_records(state.get('formatted_commits',[]))
     if df.shape[0] > 0:
@@ -113,6 +114,7 @@ def text_composer(thread_id):
     config = {"configurable": {"thread_id": thread_id}}
     DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
     with graph_context() as graph:
+        print('line117')
         state = graph.get_state(config=config).values
     
     df = pd.DataFrame().from_records(state['extracted_commits'])
@@ -123,6 +125,7 @@ def text_composer(thread_id):
     for date in sorted(unique_date):
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         with graph_context() as graph:
+            print('line 128')
             state = graph.get_state(config=config).values
         
         index = df_unique_date.index(date)
@@ -145,6 +148,7 @@ def text_composer(thread_id):
         extracted_commits = df.to_dict(orient='records')
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         with graph_context() as graph:
+            print('line 151')
             graph.update_state(
             {"configurable": {"thread_id": thread_id}},
             {'extracted_commits':extracted_commits,'compiled_diary_list':[info]})  # marks it as if an agent updated the state

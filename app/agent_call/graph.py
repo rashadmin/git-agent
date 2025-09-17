@@ -133,6 +133,7 @@ def extraction_node(state:AgentState):
         from app.extensions import graph_context
         print(extracted_commit)
         with graph_context() as graph:
+            print('line 136')
             graph.update_state(
             {"configurable": {"thread_id": thread_id}},
             {'extracted_commits':extracted_commit})
