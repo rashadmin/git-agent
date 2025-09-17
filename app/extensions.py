@@ -28,14 +28,18 @@ def graph_context():
     logging.info("[POOL] Waiting for connection...")
     from app.agent_call.graph import builder
     with pool.connection() as conn:
-        logging.info(f"[POOL] acquired conn={id(conn)} | status: {pool.status()}")
+        logging.info(f"[POOL] acquired conn={id(conn)}")
+        logging.info(f"[POOL] open={pool.open} used={pool.used} available={pool.available} max_size={pool.max_size}")
+
         try:
             conn.prepare_threshold = None
             checkpointer = PostgresSaver(conn)
             graph = builder.compile(checkpointer=checkpointer)
             yield graph
         finally:
-            logging.info(f"[POOL] released conn={id(conn)} | status: {pool.status()}")
+            logging.info(f"[POOL] open={pool.open} used={pool.used} available={pool.available} max_size={pool.max_size}")
+
+            logging.info(f"[POOL] released conn={id(conn)}")
 
     # try:
     #     checkpointer = PostgresSaver(conn)
