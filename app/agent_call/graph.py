@@ -29,21 +29,21 @@ def add(left, right):
     return left
 
 def adder(left,right):
-    if len(left)==0:
-        left.extend(right)
-        return left
-    df = pd.DataFrame().from_records(left)
-    df_updates = pd.DataFrame().from_records(right)
-    if df_updates.shape[0]>0:
-    # Merge with updates (outer join keeps everything)
-        df = df.merge(df_updates, on=["commit_id", "filename"], how="outer", suffixes=("", "_new"))
+    # if len(left)==0:
+    left.extend(right)
+    #     return left
+    # df = pd.DataFrame().from_records(left)
+    # df_updates = pd.DataFrame().from_records(right)
+    # if df_updates.shape[0]>0:
+    # # Merge with updates (outer join keeps everything)
+    #     df = df.merge(df_updates, on=["commit_id", "filename"], how="outer", suffixes=("", "_new"))
 
-        # If compiled_new exists, prefer it, else keep old compiled
-        df["compiled"] = df["compiled_new"].combine_first(df["compiled"])
+    #     # If compiled_new exists, prefer it, else keep old compiled
+    #     df["compiled"] = df["compiled_new"].combine_first(df["compiled"])
 
-    # Drop the helper column
-        df = df.drop(columns=[col for col in df.columns if "new" in col])
-    left = df.to_dict(orient='records')
+    # # Drop the helper column
+    #     df = df.drop(columns=[col for col in df.columns if "new" in col])
+    # left = df.to_dict(orient='records')
     return left
     
 
