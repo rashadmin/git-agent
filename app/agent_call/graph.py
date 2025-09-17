@@ -128,20 +128,11 @@ def extraction_node(state:AgentState):
         extracted_commit = structured_llm.invoke(commit_prompt)
         extracted_commit = [add_date(date,file) for file in extracted_commit.model_dump()['repository']]
         # extracted_commits.extend(extracted_commit)
-        DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-        thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
-        from app.extensions import graph_context
+        # DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
+        # thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
+        # from app.extensions import graph_context
         print(extracted_commit)
-        import logging
-
-        logging.basicConfig(level=logging.INFO)
-        with graph_context() as graph:
-            logging.info(f"[BEFORE update_state] {pool.get_stats()}")
-            print('line 136')
-            graph.update_state(
-            {"configurable": {"thread_id": thread_id}},
-            {'extracted_commits':extracted_commit})
-            logging.info(f"[AFTER update_state] {pool.get_stats()}")
+        extracted_commits.extend(extracted_commit)
 
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
