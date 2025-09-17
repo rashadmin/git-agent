@@ -147,6 +147,7 @@ def text_composer(thread_id):
         df.loc[df['date']==date,'compiled'] = True
         extracted_commits = df.to_dict(orient='records')
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
+
         with graph_context() as graph:
             print('line 151')
             graph.update_state(
