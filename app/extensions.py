@@ -28,7 +28,7 @@ def graph_context():
     logging.info("[POOL] Waiting for connection...")
     from app.agent_call.graph import builder
     with pool.connection() as conn:
-        logging.info(f"[POOL] acquired conn={id(conn)}")
+        logging.info(f"[POOL] acquired conn={id(conn)} open={pool.get_stats()}")
         if hasattr(pool, '_used'):
             logging.info(f"[POOL] open={pool._rused} used={pool._used} max_size={pool.max_size}")
 
@@ -40,7 +40,7 @@ def graph_context():
         finally:
             if hasattr(pool, '_used'):
                 logging.info(f"[POOL] open={pool._rused} used={pool._used} max_size={pool.max_size}")
-            logging.info(f"[POOL] released conn={id(conn)}")
+            logging.info(f"[POOL] acquired conn={id(conn)} open={pool.get_stats()}")
 
     # try:
     #     checkpointer = PostgresSaver(conn)
