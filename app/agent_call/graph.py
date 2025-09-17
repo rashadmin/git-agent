@@ -145,7 +145,7 @@ def extraction_node(state:AgentState):
             graph.update_state(
             {"configurable": {"thread_id": thread_id}},
             {'extracted_commits':extracted_commit})
-            del graph
+        del graph
         logging.info(f"[AFTER update_state] {pool.get_stats()}")
 
     # extract all the date in formatted using pandas
