@@ -131,11 +131,18 @@ def extraction_node(state:AgentState,config):
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
         print(date)
-        graph = config["configurable"]["graph"]
+        import logging
 
-        graph.update_state(
+        logging.basicConfig(level=logging.INFO)
+        logging.info(f"[POOL] acquired conn={id(conn)} open={pool.get_stats()}")
+        # graph = config["configurable"]["graph"]
+        with pool.connection() as conn:
+            saver = PostgresSaver(conn)
+            temp_graph = builder.compile(checkpointer=saver)
+            temp_graph.update_state(
             {"configurable": {"thread_id": thread_id}},
             {'extracted_commits':extracted_commit})
+            logging.info(f"[POOL] released conn={id(conn)} open={pool.get_stats()}")
 
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
