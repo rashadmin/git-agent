@@ -16,21 +16,26 @@ import psycopg
 from contextlib import contextmanager
 from psycopg_pool import ConnectionPool
 from psycopg.rows import dict_row
+import logging
 
+logging.basicConfig(level=logging.INFO)
 from flask import current_app
 DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
-pool = ConnectionPool(DB_URI, open=True,max_idle=20,max_lifetime=300,max_size=15,kwargs={"prepare_threshold": None, "row_factory": dict_row, 'autocommit':True})
+pool = ConnectionPool(DB_URI, open=True,max_idle=60,max_lifetime=300,max_size=15,kwargs={"prepare_threshold": None, "row_factory": dict_row, 'autocommit':True})
+
+
 @contextmanager
 def graph_context():
-    from app.agent_call.graph import builder # adjust imports
-    # conn = psycopg.connect(db_uri, autocommit=True,prepare_threshold=0)
+    logging.info("[POOL] Waiting for connection...")
     with pool.connection() as conn:
-        conn.prepare_threshold = None
-        # with conn.cursor() as cur:
-        #     cur.execute("DEALLOCATE ALL;")
-        checkpointer = PostgresSaver(conn)
-        graph = builder.compile(checkpointer=checkpointer)
-        yield graph
+        logging.info(f"[POOL] Connection acquired: {id(conn)}")
+        try:
+            from app.agent_call.graph import builder
+            checkpointer = PostgresSaver(conn)
+            graph = builder.compile(checkpointer=checkpointer)
+            yield graph
+        finally:
+            logging.info(f"[POOL] Connection released: {id(conn)}")
     # try:
     #     checkpointer = PostgresSaver(conn)
     #     graph = builder.compile(checkpointer=checkpointer)
