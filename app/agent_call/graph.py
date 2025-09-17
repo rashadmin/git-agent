@@ -135,14 +135,14 @@ def extraction_node(state:AgentState,config):
 
         logging.basicConfig(level=logging.INFO)
         # graph = config["configurable"]["graph"]
-        with pool.connection() as conn:
-            logging.info(f"[POOL] acquired conn={id(conn)} open={pool.get_stats()}")
-            saver = PostgresSaver(conn)
+        logging.info(f"[POOL] acquired  open={pool.get_stats()}")
+        with pool.connection() as connect:
+            saver = PostgresSaver(connect)
             temp_graph = builder.compile(checkpointer=saver)
             temp_graph.update_state(
             {"configurable": {"thread_id": thread_id}},
             {'extracted_commits':extracted_commit})
-            logging.info(f"[POOL] released conn={id(conn)} open={pool.get_stats()}")
+            logging.info(f"[POOL] released connect={id(connect)} open={pool.get_stats()}")
 
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
