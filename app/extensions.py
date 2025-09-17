@@ -29,8 +29,6 @@ def graph_context():
     from app.agent_call.graph import builder
     with pool.connection() as conn:
         logging.info(f"[POOL] acquired conn={id(conn)} open={pool.get_stats()}")
-        if hasattr(pool, '_used'):
-            logging.info(f"[POOL] open={pool._rused} used={pool._used} max_size={pool.max_size}")
 
         try:
             conn.prepare_threshold = None
@@ -38,9 +36,7 @@ def graph_context():
             graph = builder.compile(checkpointer=checkpointer)
             yield graph
         finally:
-            if hasattr(pool, '_used'):
-                logging.info(f"[POOL] open={pool._rused} used={pool._used} max_size={pool.max_size}")
-            logging.info(f"[POOL] acquired conn={id(conn)} open={pool.get_stats()}")
+            logging.info(f"[POOL] released conn={id(conn)} open={pool.get_stats()}")
 
     # try:
     #     checkpointer = PostgresSaver(conn)
