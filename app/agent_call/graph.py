@@ -124,12 +124,13 @@ def extraction_node(state:AgentState):
         # temp_date = temp['commit_date'].dt.dayofyear
         commit_prompt = prompt_template.invoke({'text_string':temp_message.tolist()})#change from state to df slice
         print('Im here\n\n\n\n\n\n')
-        structured_llm = llm.with_structured_output(schema=Repository)
-        extracted_commit = structured_llm.invoke(commit_prompt)
-        extracted_commit = [add_date(date,file) for file in extracted_commit.model_dump()['repository']]
+        # structured_llm = llm.with_structured_output(schema=Repository)
+        # extracted_commit = structured_llm.invoke(commit_prompt)
+        # extracted_commit = [add_date(date,file) for file in extracted_commit.model_dump()['repository']]
         # extracted_commits.extend(extracted_commit)
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
+        extracted_commit = ['date':date]
         from app.extensions import graph_context
         print(extracted_commit)
         import logging
