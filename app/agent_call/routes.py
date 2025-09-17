@@ -16,7 +16,7 @@ from app.extensions import graph_context
 from app.agent_call.graph import builder
 from langgraph.checkpoint.postgres import PostgresSaver
 import psycopg
-from app.agent_call.graph import graph
+# from app.agent_call.graph import graph
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
 # listener_thread.start()
