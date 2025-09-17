@@ -36,7 +36,8 @@ def graph_context():
             graph = builder.compile(checkpointer=checkpointer)
             yield graph
         finally:
-            logging.info(f"[POOL] released conn={id(conn)} open={pool.get_stats()}")
+            print(None)
+    logging.info(f"[POOL] released conn={id(conn)} open={pool.get_stats()}")
 
     # try:
     #     checkpointer = PostgresSaver(conn)
