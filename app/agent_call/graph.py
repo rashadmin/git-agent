@@ -33,16 +33,14 @@ def adder(left,right):
         return left
     df = pd.DataFrame().from_records(left)
     df_updates = pd.DataFrame().from_records(right)
-    if df_updates.shape[0]>0:
-    # Merge with updates (outer join keeps everything)
-        df = df.merge(df_updates, on=["commit_id", "filename"], how="outer", suffixes=("", "_new"))
+    new_dates = df_updates["date"].unique()
 
-        # If compiled_new exists, prefer it, else keep old compiled
-        df["compiled"] = df["compiled_new"].combine_first(df["compiled"])
+    # Drop old rows that match new dates
+    df = df[~df["date"].isin(new_dates)]
 
-    # Drop the helper column
-        df.drop(['compiled_new'],axis=1,inplace=True)
-        # df = df.drop(columns=[col for col in df.columns if "new" in col])
+    # Append new rows
+    df = pd.concat([df, df_updates], ignore_index=True)
+
     left = df.to_dict(orient='records')
     return left
     
