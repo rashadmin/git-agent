@@ -12,6 +12,7 @@ def extract_commits(data):
         # DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         from app.agent_call.graph import builder
         from app.extensions import pool
+        logging.error('Started')
         with pool.connection() as connect:
             checkpointer = PostgresSaver(connect)
             graph = builder.compile(checkpointer=checkpointer)
@@ -21,9 +22,3 @@ def extract_commits(data):
         logging.error('Unhandled exception', exc_info=sys.exc_info())
     finally:
         logging.info('Commit Extracted Completely')
-
-
-
-
-def run_agent(data):
-    

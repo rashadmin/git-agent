@@ -63,6 +63,7 @@ def retry_route(retries=3, delay=2, backoff=2):
 # @retry_route(retries=3, delay=2, backoff=2)
 # @app.route("/agent")
 def run_agent():
+    from tasks import extract_commits
     # global active_thread_id
     event = request.headers.get("X-GitHub-Event")
     # print(event)
@@ -72,8 +73,9 @@ def run_agent():
     data = request.json
     username = data["repository"]["full_name"].split('/')[0]
     user = User.query.filter_by(username=username).first_or_404()
-    user.launch_task('extract_commits',data)
-    db.session.commit()
+    # user.launch_task('extract_commits',data)
+    extract_commits(data)
+    # db.session.commit()
     return 'Agent run'
     
 @bp.route("/compose", methods=["GET"])
