@@ -83,7 +83,7 @@ class User(UserMixin,PaginatedAPIMixin,db.Model):
         rq_job = current_app.task_queue.enqueue('app.tasks.' + name, data,
                                                 *args, **kwargs)
         task = Task(id=rq_job.get_id(), name=name,
-                    user=self)
+                    user_id=self.id)
         db.session.add(task)
         return task
 
