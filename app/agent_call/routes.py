@@ -32,10 +32,34 @@ def health_check():
     return jsonify(status="ok")
 
 
+import functools
+import psycopg
+import time
+
+def retry_route(retries=3, delay=2, backoff=2):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            attempt = 0
+            wait = delay
+            while attempt < retries:
+                try:
+                    return func(*args, **kwargs)
+                except (psycopg.OperationalError, psycopg.InternalError_) as e:
+                    attempt += 1
+                    if attempt < retries:
+                        print(f"[RETRY] DB error: {e}. Retrying {attempt}/{retries} in {wait}s...")
+                        time.sleep(wait)
+                        wait *= backoff
+                    else:
+                        raise
+        return wrapper
+    return decorator
 
 
 
 @bp.route("/agent", methods=["POST"])
+@retry_route(retries=5, delay=2, backoff=2)
 # @app.route("/agent")
 def run_agent():
     # global active_thread_id
