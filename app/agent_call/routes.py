@@ -71,7 +71,7 @@ def run_agent():
     print('hereeeeeeeee')
     data = request.json
     username = data["repository"]["full_name"].split('/')[0]
-    user = User.filter_by(username=username).first_or_404().id
+    user = User.query.filter_by(username=username).first_or_404()
     user.launch_task('extract_commits',data)
     db.session.commit()
     return 'Agent run'
