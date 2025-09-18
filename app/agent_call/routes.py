@@ -46,7 +46,7 @@ def retry_route(retries=3, delay=2, backoff=2):
             while attempt < retries:
                 try:
                     return func(*args, **kwargs)
-                except (psycopg.OperationalError, psycopg.InternalError_) as e:
+                except (psycopg.OperationalError, psycopg.InternalError) as e:
                     attempt += 1
                     if attempt < retries:
                         print(f"[RETRY] DB error: {e}. Retrying {attempt}/{retries} in {wait}s...")
@@ -60,7 +60,7 @@ def retry_route(retries=3, delay=2, backoff=2):
 
 
 @bp.route("/agent", methods=["POST"])
-@retry_route(retries=3, delay=2, backoff=2)
+# @retry_route(retries=3, delay=2, backoff=2)
 # @app.route("/agent")
 def run_agent():
     # global active_thread_id
