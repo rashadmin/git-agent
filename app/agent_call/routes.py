@@ -63,7 +63,7 @@ def retry_route(retries=3, delay=2, backoff=2):
 # @retry_route(retries=3, delay=2, backoff=2)
 # @app.route("/agent")
 def run_agent():
-    from tasks import extract_commits
+    from app.tasks import extract_commits
     # global active_thread_id
     event = request.headers.get("X-GitHub-Event")
     # print(event)
