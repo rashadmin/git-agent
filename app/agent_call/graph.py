@@ -130,7 +130,6 @@ def extraction_node(state:AgentState):
         extracted_commits.extend(extracted_commit)
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
-        extracted_commit = [{'date':date}]
         from app.extensions import graph_context
         print(extracted_commit)
         import logging
