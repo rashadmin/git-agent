@@ -50,11 +50,9 @@ def run_agent():
     print('yhhhhhhhhhhhhhhhhhhhhhh\n\n\n\n\n\n\n\n')
     DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
     from app.agent_call.graph import builder
-    from app.extensions import pool
-    with pool.connection() as conn:
-        checkpointer = PostgresSaver(conn)
-        graph = builder.compile(checkpointer=checkpointer)
-        config = {"configurable": {"thread_id": thread_id,"graph": graph}}
+    from app.extensions import graph_context
+    with graph_context() as graph:
+        config = {"configurable": {"thread_id": thread_id}}
         graph.invoke({'commits':data,'user_id':username},config=config)
     # user_input = data.get("message")
     # thread_id = data.get("thread_id", "default")

@@ -18,7 +18,6 @@ from langchain.chat_models import init_chat_model
 import os
 from pydantic import BaseModel,Field
 from typing import Optional,List,Set
-from app.extensions import pool
 from langgraph.checkpoint.postgres import PostgresSaver
 
 # ---- State Definition ----
@@ -136,13 +135,11 @@ def extraction_node(state:AgentState):
 
         logging.basicConfig(level=logging.INFO)
         with graph_context() as graph:
-            logging.info(f"[BEFORE update_state] {pool.get_stats()}")
             print('line 136')
             graph.update_state(
             {"configurable": {"thread_id": thread_id}},
             {'extracted_commits':extracted_commit})
         del graph
-        logging.info(f"[AFTER update_state] {pool.get_stats()}")
 
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
