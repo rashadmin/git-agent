@@ -23,6 +23,28 @@ from flask import current_app
 DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require"
 pool = ConnectionPool(DB_URI, open=True,min_size=10,max_idle=600,max_lifetime=1500,max_size=15,kwargs={"prepare_threshold": None, "row_factory": dict_row, 'autocommit':True})
 
+import time
+import logging
+import psycopg
+
+def with_retry(func, *args, retries=3, delay=2, **kwargs):
+    """
+    Retry wrapper for database-dependent operations like graph.invoke() 
+    or graph.update_state() that may fail due to transient DB errors.
+    """
+    for attempt in range(1, retries + 1):
+        try:
+            return func(*args, **kwargs)
+        except psycopg.OperationalError as e:
+            logging.warning(
+                f"DB connection failed on attempt {attempt}/{retries}: {e}"
+            )
+            if attempt == retries:
+                logging.error("Max retries reached. Raising exception.")
+                raise
+            time.sleep(delay * attempt)  # exponential backoff
+
+
 @contextmanager
 def graph_context():
     from app.agent_call.graph import builder
