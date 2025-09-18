@@ -20,7 +20,8 @@ import psycopg
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
 # listener_thread.start()
-
+from redis import Redis
+import rq
 #to add model
 def yday_to_date(row):
     return datetime(int(row["year"]), 1, 1) + timedelta(days=int(row["dayofyear"]) - 1)
@@ -59,7 +60,7 @@ def retry_route(retries=3, delay=2, backoff=2):
 
 
 @bp.route("/agent", methods=["POST"])
-@retry_route(retries=5, delay=2, backoff=2)
+@retry_route(retries=3, delay=2, backoff=2)
 # @app.route("/agent")
 def run_agent():
     # global active_thread_id
@@ -69,25 +70,11 @@ def run_agent():
         return jsonify({"msg": "Not a push event"}), 200
     print('hereeeeeeeee')
     data = request.json
-    thread_id = data['repository']['full_name'].encode("utf-8").hex()
     username = data["repository"]["full_name"].split('/')[0]
-    print('yhhhhhhhhhhhhhhhhhhhhhh\n\n\n\n\n\n\n\n')
-    DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-    from app.agent_call.graph import builder
-    from app.extensions import pool
-    with pool.connection() as connect:
-        checkpointer = PostgresSaver(connect)
-        graph = builder.compile(checkpointer=checkpointer)
-        config = {"configurable": {"thread_id": thread_id}}
-        graph.invoke({'commits':data,'user_id':username},config=config)
-    # user_input = data.get("message")
-    # thread_id = data.get("thread_id", "default")
-    # active_thread_id = thread_id
-
-    # config = {"configurable": {"thread_id": thread_id}}
-
-    # result = graph.invoke({"requests": [], "last_id": "0"}, config=config)
-    return 'hello world'
+    user = User.filter_by(username=username).first_or_404().id
+    user.launch_task('extract_commits',data)
+    db.session.commit()
+    return 'Agent run'
     
 @bp.route("/compose", methods=["GET"])
 def compose_text():

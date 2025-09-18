@@ -12,9 +12,10 @@ class Config(object):
     X_ACCESS_TOKEN = os.environ.get('X_ACCESS_TOKEN')
     X_ACCESS_TOKEN_SECRET=os.environ.get('X_ACCESS_TOKEN_SECRET')
     ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
+    REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
     if os.getenv('DATABASE_URL'):
         SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL').replace("postgres://", "postgresql://", 1)
     else:
-        SQLALCHEMY_DATABASE_URI = 'postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require' or \
+        SQLALCHEMY_DATABASE_URI = 'postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require' or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False

@@ -6,7 +6,8 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 import sqlalchemy as sa
 from psycopg_pool import ConnectionPool
-
+from redis import Redis
+import rq
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
@@ -26,6 +27,8 @@ def create_app(config_class=Config):
         app.register_blueprint(api_bp, url_prefix='/api')
         from app.posting import bp as posting_bp
         app.register_blueprint(posting_bp, url_prefix='/posting')
+        app.redis = Redis.from_url(app.config['REDIS_URL'])
+        app.task_queue = rq.Queue('git_agent-tasks', connection=app.redis)
     engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'],connect_args={"sslmode": "require"})
     inspector = sa.inspect(engine)
     if not inspector.has_table("user"):

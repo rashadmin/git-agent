@@ -9,6 +9,9 @@ from app.posting.twitter_post import post_thread
 import os
 import base64
 import json
+from flask import current_app
+import redis
+import rq
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -74,7 +77,22 @@ class User(UserMixin,PaginatedAPIMixin,db.Model):
         return self.token
 
     def revoke_token(self):
-        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
+        self.token_expiration = datetime.now() - timedelta(seconds=1)
+
+    def launch_task(self, name,data, *args, **kwargs):
+        rq_job = current_app.task_queue.enqueue('app.tasks.' + name, data,
+                                                *args, **kwargs)
+        task = Task(id=rq_job.get_id(), name=name,
+                    user=self)
+        db.session.add(task)
+        return task
+
+    def get_tasks_in_progress(self):
+        return Task.query.filter_by(user=self, complete=False).all()
+
+    def get_task_in_progress(self, name):
+        return Task.query.filter_by(name=name, user=self,
+                                    complete=False).first()
 
     @staticmethod
     def check_token(token):
@@ -157,6 +175,21 @@ class Post(PaginatedAPIMixin,db.Model):
         self.twitter_thread = json.dumps(data["twitter_thread"])
 
 
+class Task(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    name = db.Column(db.String(128), index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    complete = db.Column(db.Boolean, default=False)
 
+    def get_rq_job(self):
+        try:
+            rq_job = rq.job.Job.fetch(self.id, connection=current_app.redis)
+        except (redis.exceptions.RedisError, rq.exceptions.NoSuchJobError):
+            return None
+        return rq_job
+
+    def get_progress(self):
+        job = self.get_rq_job()
+        return job.meta.get('progress', 0) if job is not None else 100
 
                 
