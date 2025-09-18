@@ -41,6 +41,7 @@ def adder(left,right):
         df["compiled"] = df["compiled_new"].combine_first(df["compiled"])
 
     # Drop the helper column
+        df.drop(['compiled_new'],axis=1,inplace=True)
         # df = df.drop(columns=[col for col in df.columns if "new" in col])
     left = df.to_dict(orient='records')
     return left
