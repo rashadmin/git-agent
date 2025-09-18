@@ -26,12 +26,17 @@ pool = ConnectionPool(DB_URI, open=True,min_size=10,max_idle=60,max_lifetime=300
 @contextmanager
 def graph_context():
     from app.agent_call.graph import builder
-    conn = psycopg.connect(DB_URI, autocommit=True, prepare_threshold=None, row_factory=dict_row)
-    checkpointer = PostgresSaver(conn)
-    try:
-        yield builder.compile(checkpointer=checkpointer)
-    finally:
-        conn.close()
+    checkpointer = PostgresSaver(lambda: pool.connection())  # factory, not raw conn
+    graph = builder.compile(checkpointer=checkpointer)
+    yield graph
+# def graph_context():
+#     from app.agent_call.graph import builder
+#     conn = psycopg.connect(DB_URI, autocommit=True, prepare_threshold=None, row_factory=dict_row)
+#     checkpointer = PostgresSaver(conn)
+#     try:
+#         yield builder.compile(checkpointer=checkpointer)
+#     finally:
+#         conn.close()
 # def graph_context():
 #     logging.info("[POOL] Waiting for connection...")
 #     from app.agent_call.graph import builder
