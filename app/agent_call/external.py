@@ -122,7 +122,8 @@ def text_composer(thread_id):
     uncompiled_df = df[df['compiled']==False]
     unique_date = uncompiled_df['date'].unique()
     print(df['compiled'].value_counts())
-    for date in sorted(unique_date):
+    sorted(unique_date)
+    for date in unique_date:
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         with graph_context() as graph:
             print('line 128')
@@ -156,7 +157,8 @@ def text_composer(thread_id):
         
         username = state['user_id']
         user_id = User.query.filter_by(username=username).first().id
-        id = (username+info['repo']+date).encode("utf-8").hex()
+        id = (info['repo']+date).encode("utf-8").hex()
+        print(id)
         year =int(date.split('-')[0])
         dayofyear = int(date.split('-')[1])
         date_committed = doy_to_date(year,dayofyear)

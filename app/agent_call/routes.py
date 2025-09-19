@@ -74,6 +74,7 @@ def compose_text():
         text_composer(thread_id)
         repo = bytes.fromhex(thread_id).decode("utf-8")
         date_in_db = cur.execute(f"SELECT date_committed FROM post where repo ='{repo}'")
+        #getting date in db
         config = {"configurable": {"thread_id": thread_id}}
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
         with graph_context() as graph:
@@ -82,12 +83,14 @@ def compose_text():
         date_in_diary = df['date'].str.split('-',expand=True).rename(columns={0:'year',1:'dayofyear'})
         date_in_diary_val = date_in_diary.apply(yday_to_date, axis=1).values
         for date in date_in_diary_val:
+            # we don't need to convert, get the datein compiled_diary_list, conveert to year-dayofyear
             # conver from datetime to date
             dayofyear= str(pd.Timestamp(date).dayofyear)
             year = str(pd.Timestamp(date).year)
             coded_date = year+'-'+dayofyear
             info = df[df['date']==coded_date].iloc[0].to_dict()
             print(date,'\n\n\n\n\n\n')
+            # convert date in db to y-doy format
             if not date in date_in_db:
                 username=repo.split('/')[0]
                 user_id = User.query.filter_by(username=username).first().id

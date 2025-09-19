@@ -63,6 +63,7 @@ class Repository(BaseModel):
 class AgentState(TypedDict):
     commits:str
     user_id:str
+    date:str
     formatted_commits:Annotated[List[dict],add]
     extracted_commits:Annotated[List[dict],adder]
     compiled_diary_list:Annotated[List[dict],add]
@@ -86,59 +87,46 @@ prompt_template = ChatPromptTemplate([('system',
 #chck if the lenth of data is equal to len of formatted for that repository in the checkpointer
 
 
-def receiver_node(state:AgentState):
-    payload = state['commits']
-    formatted = get_all_commits(payload)
-    print('It was at receiver node')
-    # print(formatted)
-    formatted = [item for sublist in formatted for item in sublist]
-    return {'formatted_commits':formatted}
+# def receiver_node(state:AgentState):
+#     payload = state['commits']
+#     formatted = get_all_commits(payload)
+#     print('It was at receiver node')
+#     # print(formatted)
+#     formatted = [item for sublist in formatted for item in sublist]
+#     return {'formatted_commits':formatted}
 
 def extraction_node(state:AgentState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
     llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
-    extracted_commits = []
     print('could be here \n\n\n\n\n\n')
     # print(state['formatted_commits'])
     df = pd.DataFrame().from_records(state['formatted_commits'])
+    day = state['day']
+    df_to_extract = df[df['day']==day]
     print(df.head())
     extracted_commits_df = pd.DataFrame().from_records(state.get('extracted_commits',[]))
     if extracted_commits_df.shape[0] > 0:
-        df["commit_id"] = df["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
-        df = df[~df["commit_id"].isin(extracted_commits_df["commit_id"])]
-        df.drop('commit_id',axis=1,inplace=True)
-    df['commit_date'] = pd.to_datetime(df['commit_date'])
-    df.sort_values('commit_date',inplace=True)
-    df['dayofyear'] = df['commit_date'].dt.dayofyear.astype(str)
-    df['year'] = df['commit_date'].dt.year.astype(str)
-    df['day'] = df['year']+'-'+df['dayofyear']
-    df.drop(['dayofyear','year'],axis=1,inplace=True)
-    unique_commit_date = df['day'].unique()
-    print('unique commit')
-    print(unique_commit_date)
-    for date in unique_commit_date:
-        temp = df[df['day']==date]
-        temp_message = temp['message']
-        # temp_date = temp['commit_date'].dt.dayofyear
-        commit_prompt = prompt_template.invoke({'text_string':temp_message.tolist()})#change from state to df slice
-        print('Im here\n\n\n\n\n\n')
-        structured_llm = llm.with_structured_output(schema=Repository)
-        extracted_commit = structured_llm.invoke(commit_prompt)
-        extracted_commit = [add_date(date,file) for file in extracted_commit.model_dump()['repository']]
-        extracted_commits.extend(extracted_commit)
-        DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-        thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
-        from app.extensions import graph_context
-        print(extracted_commit)
-        import logging
-
-        logging.basicConfig(level=logging.INFO)
-        with graph_context() as graph:
-            print('line 136')
-            graph.update_state(
-            {"configurable": {"thread_id": thread_id}},
-            {'extracted_commits':extracted_commit})
-        del graph
+        df_to_extract["commit_id"] = df_to_extract["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
+        df_to_extract = df_to_extract[~df_to_extract["commit_id"].isin(extracted_commits_df["commit_id"])]
+        df_to_extract.drop('commit_id',axis=1,inplace=True)
+    temp_message = df_to_extract['message']
+    commit_prompt = prompt_template.invoke({'text_string':temp_message.tolist()})#change from state to df slice
+    print('Im here\n\n\n\n\n\n')
+    structured_llm = llm.with_structured_output(schema=Repository)
+    extracted_commit = structured_llm.invoke(commit_prompt)
+    extracted_commit = [add_date(day,file) for file in extracted_commit.model_dump()['repository']]
+    DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
+    thread_id = state['commits']['repository']['full_name'].encode("utf-8").hex()
+    from app.extensions import graph_context
+    print(extracted_commit)
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    with graph_context() as graph:
+        print('line 136')
+        graph.update_state(
+        {"configurable": {"thread_id": thread_id}},
+        {'extracted_commits':extracted_commit})
+    del graph
 
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
@@ -147,17 +135,17 @@ def extraction_node(state:AgentState):
     print('Im now here \n\n\n\n\n\n')
         # a looop end#
     print('It was at extraction node')
-    return {'extracted_commits':extracted_commits}
+    return {'extracted_commits':extracted_commit}
 
 # it is in reverseeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for the extracted commit, earliest come last
 
 # ---- Graph Definition ----
 builder = StateGraph(AgentState)
-builder.add_node(receiver_node)
+# builder.add_node(receiver_node)
 builder.add_node(extraction_node)
 # builder.add_node("responder", responder)
-builder.set_entry_point("receiver_node")
-builder.add_edge("receiver_node", "extraction_node")
+builder.set_entry_point("extraction_node")
+# builder.add_edge("receiver_node", "?extraction_node")
 builder.add_edge("extraction_node",END)
 # DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require"
 
