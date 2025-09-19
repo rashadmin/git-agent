@@ -9,7 +9,7 @@ from psycopg.errors import OperationalError, DatabaseError
 from app.agent_call.external import format_github_request,get_all_commits
 import pandas as pd
 import datetime
-from time import time
+import time
 @retry(
     retry=retry_if_exception_type((OperationalError, DatabaseError)),
     stop=stop_after_attempt(3),    # retry up to 3 times
