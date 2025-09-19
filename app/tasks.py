@@ -4,6 +4,15 @@ import logging
 from flask import current_app
 from langgraph.checkpoint.postgres import PostgresSaver
 logging.basicConfig(level=logging.INFO)
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
+from psycopg.errors import OperationalError, DatabaseError
+
+@retry(
+    retry=retry_if_exception_type((OperationalError, DatabaseError)),
+    stop=stop_after_attempt(3),    # retry up to 3 times
+    wait=wait_fixed(2),            # wait 2s between retries
+    reraise=True
+)
 def extract_commits(data):
     try:
         thread_id = data['repository']['full_name'].encode("utf-8").hex()

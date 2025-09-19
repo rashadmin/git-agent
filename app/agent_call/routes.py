@@ -32,13 +32,6 @@ def yday_to_date(row):
 
 @bp.route("/health",methods=['GET'])
 def health_check():
-    try:
-        with pool.connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT 1;")
-                logging.info("Keepalive query executed.")
-    except Exception as e:
-        logging.warning(f"Keepalive failed: {e}")
     print('Checking Health Status')
     return jsonify(status="ok")
 
