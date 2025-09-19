@@ -16,6 +16,9 @@ from app.extensions import graph_context
 from app.agent_call.graph import builder
 from langgraph.checkpoint.postgres import PostgresSaver
 import psycopg
+from app.extensions import pool
+import logging
+logging.basicConfig(level=logging.INFO)
 # from app.agent_call.graph import graph
 # Start listener thread when app launches
 # listener_thread = threading.Thread(target=background_listener, args=(graph,), daemon=True)
@@ -29,33 +32,18 @@ def yday_to_date(row):
 
 @bp.route("/health",methods=['GET'])
 def health_check():
+    try:
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1;")
+                logging.info("Keepalive query executed.")
+    except Exception as e:
+        logging.warning(f"Keepalive failed: {e}")
     print('Checking Health Status')
     return jsonify(status="ok")
 
 
-import functools
-import psycopg
-import time
 
-def retry_route(retries=3, delay=2, backoff=2):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            attempt = 0
-            wait = delay
-            while attempt < retries:
-                try:
-                    return func(*args, **kwargs)
-                except (psycopg.OperationalError, psycopg.InternalError) as e:
-                    attempt += 1
-                    if attempt < retries:
-                        print(f"[RETRY] DB error: {e}. Retrying {attempt}/{retries} in {wait}s...")
-                        time.sleep(wait)
-                        wait *= backoff
-                    else:
-                        raise
-        return wrapper
-    return decorator
 
 
 
