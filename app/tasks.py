@@ -42,7 +42,7 @@ def extract_commits(data):
                 checkpointer = PostgresSaver(conn)
                 graph = builder.compile(checkpointer=checkpointer)
                 config = {"configurable": {"thread_id": thread_id}}
-                graph.invoke({'formatted_commits':temp_df.to_dict(orient='records'),'day':day},config=config)
+                graph.invoke({'repo':data['repository']['full_name'],'formatted_commits':temp_df.to_dict(orient='records'),'day':day},config=config)
         except:
             current_app.logger.error("DB connection lost, resetting session...", exc_info=True)
             # throw away dead session

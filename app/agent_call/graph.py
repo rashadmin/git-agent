@@ -61,7 +61,7 @@ class Repository(BaseModel):
 
 
 class AgentState(TypedDict):
-    commits:str
+    repo:str
     user_id:str
     day:str
     formatted_commits:Annotated[List[dict],add]
