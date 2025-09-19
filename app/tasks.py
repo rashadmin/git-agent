@@ -51,5 +51,5 @@ def extract_commits(data):
             db.engine.dispose()
             logging.error('Unhandled exception', exc_info=sys.exc_info())
 
-    finally:
-        logging.info('Commit Extracted Completely')
+        finally:
+            logging.info('Commit Extracted Completely')
