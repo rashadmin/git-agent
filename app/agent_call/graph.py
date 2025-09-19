@@ -46,8 +46,8 @@ def adder(left,right):
     
 
 from datetime import datetime
-def add_date(date,file):
-    file.update({'date':date,'compiled':False})
+def add_date(day,file):
+    file.update({'date':day,'compiled':False})
     return file
 
 class File(BaseModel):
@@ -115,18 +115,19 @@ def extraction_node(state:AgentState):
     structured_llm = llm.with_structured_output(schema=Repository)
     extracted_commit = structured_llm.invoke(commit_prompt)
     extracted_commit = [add_date(day,file) for file in extracted_commit.model_dump()['repository']]
-    DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-    thread_id = state['repo'].encode("utf-8").hex()
-    from app.extensions import graph_context
-    print(extracted_commit)
-    import logging
-    logging.basicConfig(level=logging.INFO)
-    with graph_context() as graph:
-        print('line 136')
-        graph.update_state(
-        {"configurable": {"thread_id": thread_id}},
-        {'extracted_commits':extracted_commit})
-    del graph
+    # DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
+    # thread_id = state['repo'].encode("utf-8").hex()
+    # from app.extensions import graph_context
+    # print(extracted_commit)
+    # import logging
+    # logging.basicConfig(level=logging.INFO)
+    # with graph_context() as graph:
+    #     print('line 136')
+    #     graph.update_state(
+    #     {"configurable": {"thread_id": thread_id}},
+    #     {'extracted_commits':extracted_commit})
+    # del graph
+    return {'extracted_commits':extracted_commit}
 
     # extract all the date in formatted using pandas
     # slice through df for each date, using each date run the extract and extend the extracted_commit list
