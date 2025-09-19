@@ -23,7 +23,7 @@ def extract_commits(data):
     df = pd.DataFrame().from_records(formatted)
     df['commit_date'] = pd.to_datetime(df['commit_date'])
     today = pd.Timestamp.today().normalize()
-    filtered_df = df[~df['commit_date'].dt.normalize() == today]
+    filtered_df = df[~(df['commit_date'].dt.normalize() == today)]
     filtered_df['dayofyear'] = filtered_df['commit_date'].dt.dayofyear.astype(str)
     filtered_df['year'] = filtered_df['commit_date'].dt.year.astype(str)
     filtered_df['day'] = filtered_df['year']+'-'+filtered_df['dayofyear']
