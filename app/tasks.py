@@ -22,7 +22,7 @@ def extract_commits(data):
     formatted = [item for sublist in formatted for item in sublist]
     df = pd.DataFrame().from_records(formatted)
     df['commit_date'] = pd.to_datetime(df['commit_date'])
-    today = pd.Timestamp.today().normalize()
+    today = datetime.date.today().strftime("%Y-%m-%d")
     filtered_df = df[~(df['commit_date'].dt.normalize() == today)]
     filtered_df['dayofyear'] = filtered_df['commit_date'].dt.dayofyear.astype(str)
     filtered_df['year'] = filtered_df['commit_date'].dt.year.astype(str)
@@ -37,12 +37,9 @@ def extract_commits(data):
             thread_id = data['repository']['full_name'].encode("utf-8").hex()
             username = data["repository"]["full_name"].split('/')[0]
             # DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-            from app.agent_call.graph import builder
+            from app.extensions import graph_context
             from app.extensions import pool
-            logging.info('Started')
-            with pool.connection() as conn:
-                checkpointer = PostgresSaver(conn)
-                graph = builder.compile(checkpointer=checkpointer)
+            with graph_context() as graph:
                 config = {"configurable": {"thread_id": thread_id}}
                 graph.invoke({'repo':data['repository']['full_name'],'formatted_commits':temp_df.to_dict(orient='records'),'day':day},config=config)
         except:
