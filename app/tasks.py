@@ -28,8 +28,10 @@ def extract_commits(data):
     filtered_df['year'] = filtered_df['commit_date'].dt.year.astype(str)
     filtered_df['day'] = filtered_df['year']+'-'+filtered_df['dayofyear']
     filtered_df.drop(['dayofyear','year'],axis=1,inplace=True)
-    days = filtered_df['day'].unique()
-    for day in sorted(days):
+    days = sorted(filtered_df['day'].unique())
+    logging.info(f'Dates :{days}')
+
+    for day in days:
         temp_df = filtered_df[filtered_df['day']==day]
         try:
             thread_id = data['repository']['full_name'].encode("utf-8").hex()
