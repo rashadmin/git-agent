@@ -19,7 +19,10 @@ import os
 from pydantic import BaseModel,Field
 from typing import Optional,List,Set
 from langgraph.checkpoint.postgres import PostgresSaver
-
+from app.agent_call.composer import run_compose
+from app.agent_call.external import doy_to_date
+from app.models  import User,Post
+from app import db
 # ---- State Definition ----
 def add(left, right):
     if right == "__RESET__":
@@ -115,46 +118,58 @@ def extraction_node(state:AgentState):
     structured_llm = llm.with_structured_output(schema=Repository)
     extracted_commit = structured_llm.invoke(commit_prompt)
     extracted_commit = [add_date(day,file) for file in extracted_commit.model_dump()['repository']]
-    # DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-    # thread_id = state['repo'].encode("utf-8").hex()
-    # from app.extensions import graph_context
-    # print(extracted_commit)
-    # import logging
-    # logging.basicConfig(level=logging.INFO)
-    # with graph_context() as graph:
-    #     print('line 136')
-    #     graph.update_state(
-    #     {"configurable": {"thread_id": thread_id}},
-    #     {'extracted_commits':extracted_commit})
-    # del graph
-    return {'extracted_commits':extracted_commit}
-
-    # extract all the date in formatted using pandas
-    # slice through df for each date, using each date run the extract and extend the extracted_commit list
-    # a looop start#
-    #i'm thinking  a date should be added to make composing text for each day easier for bulk composing
-    print('Im now here \n\n\n\n\n\n')
-        # a looop end#
     print('It was at extraction node')
     return {'extracted_commits':extracted_commit}
 
-# it is in reverseeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for the extracted commit, earliest come last
+def compose_node(state:AgentState):
+    df = pd.DataFrame().from_records(state['extracted_commits'])
+    day = state['day']
+    df_unique_date= sorted(df['date'].unique())
+    temp_df = df[(df['compiled']==False) and (df['date']==day)]
+    print(df['compiled'].value_counts())
+    index = df_unique_date.index(day)
+    #GET THE SUMMARY OF THE PREVIOUS COMMIT DATE:
+    if index !=0:
+        compiled_df = pd.DataFrame().from_records(state['compiled_diary_list'])
+        backlog_date = df_unique_date[index-1]
+        backlog_summary = compiled_df[compiled_df['date']==backlog_date]['summary']
+    else:
+        backlog_summary = ''
+    day_x = len(state.get('compiled_diary_list',[]))+1
+    temp_df['file_patch'] = 'FileName : ' + temp_df['filename'] + 'Patch : ' + temp_df['Patch']
+    patch = temp_df['file_patch'].tolist()
+    result = run_compose(day=day_x,commit_logs=patch,previous_summary=backlog_summary)
+    info = {'twitter_thread':result['twitter_thread'],'facebook_post':result['facebook_post'].content,
+        'linkedin_post':result['linkedin_post'].content,'summary':result['summary'].content,'repo':state['repo'],
+        'date':day}
+    username = state['repo'].split('/')[0]
+    user_id = User.query.filter_by(username=username).first().id
+    id = (info['repo']+day).encode("utf-8").hex()
+    print(id)
+    year =int(day.split('-')[0])
+    dayofyear = int(day.split('-')[1])
+    date_committed = doy_to_date(year,dayofyear)
+    info.update({'date_committed':date_committed,'user_id':user_id,'id':id})
+    existing = db.session.get(Post, id)
+    if existing is None:
+        post = Post()
+        post.from_dict(info)
+        db.session.add(post)
+    else:
+        existing.from_dict(info)
+    db.session.commit()
+    df.loc[df['date']==day,'compiled'] = True
+    extracted_commits = df.to_dict(orient='records')
+    return {'extracted_commits':extracted_commits,'compiled_diary_list':[info]}  # marks it as if an agent updated the state
+    
 
 # ---- Graph Definition ----
 builder = StateGraph(AgentState)
-# builder.add_node(receiver_node)
 builder.add_node(extraction_node)
-# builder.add_node("responder", responder)
+builder.add_node(compose_node)
 builder.set_entry_point("extraction_node")
-# builder.add_edge("receiver_node", "?extraction_node")
-builder.add_edge("extraction_node",END)
-# DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require"
-
-# conn = psycopg.connect(DB_URI, autocommit=True)
-
-# checkpointer = PostgresSaver(conn)
-# graph = builder.compile(checkpointer=checkpointer)
-# ---- Graph Factory ----
+builder.add_edge("extraction_node", "compose_node")
+builder.add_edge("compose_node",END)
 
 
 
