@@ -41,7 +41,7 @@ from psycopg.rows import dict_row
 
 
 # Database connection URI
-DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require"
+DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require"
 
 # Connection pool (optimized for single-loop usage)
 pool = ConnectionPool(
