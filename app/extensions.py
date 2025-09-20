@@ -21,7 +21,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 from flask import current_app
 DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require"
-pool = ConnectionPool(DB_URI, open=True,min_size=10,max_lifetime=6000,max_size=15,
+pool = ConnectionPool(DB_URI, open=True,min_size=10,max_lifetime=600,max_size=15,
                       kwargs={"prepare_threshold": None, "row_factory": dict_row, 'autocommit':True,
     "keepalives": 1,
     "keepalives_idle": 30,
