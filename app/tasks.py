@@ -8,6 +8,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_t
 from psycopg.errors import OperationalError, DatabaseError
 from app.agent_call.external import format_github_request,get_all_commits
 import pandas as pd
+from app.extensions import run_graph
 import datetime
 import time
 @retry(
@@ -25,9 +26,9 @@ def extract_commits(data):
     df['commit_date'] = pd.to_datetime(df['commit_date'])
     today = datetime.date.today().strftime("%Y-%m-%d")
     filtered_df = df[~(df['commit_date'].dt.normalize() == today)]
-    filtered_df['dayofyear'] = filtered_df['commit_date'].dt.dayofyear.astype(str)
-    filtered_df['year'] = filtered_df['commit_date'].dt.year.astype(str)
-    filtered_df['day'] = filtered_df['year']+'-'+filtered_df['dayofyear']
+    filtered_df.loc[:,'dayofyear'] = filtered_df['commit_date'].dt.dayofyear.astype(str)
+    filtered_df.loc[:,'year'] = filtered_df['commit_date'].dt.year.astype(str)
+    filtered_df.loc[:,'day'] = filtered_df['year']+'-'+filtered_df['dayofyear']
     filtered_df.drop(['dayofyear','year'],axis=1,inplace=True)
     days = sorted(filtered_df['day'].unique())
     logging.info(f'Dates :{days}')
@@ -45,14 +46,12 @@ def extract_commits(data):
 
                 with graph_context() as graph:
                     config = {"configurable": {"thread_id": thread_id}}
-                    graph.invoke(
-                        {
+                    data = {
                             'repo': data['repository']['full_name'],
                             'formatted_commits': temp_df.to_dict(orient='records'),
                             'day': day
-                        },
-                        config=config
-                    )
+                        }
+                    run_graph(graph, data, config)
                 success = True  # ✅ success, break the retry loop
 
             except Exception as e:

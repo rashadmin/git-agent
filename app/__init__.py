@@ -36,6 +36,7 @@ def create_app(config_class=Config):
             db.drop_all()
             db.create_all()
             app.logger.info('Initialized the database!')
+
     return app
 
 # from app.agent_call import routes
