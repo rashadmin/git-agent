@@ -120,6 +120,7 @@ def extraction_node(state:AgentState):
     extracted_commit = structured_llm.invoke(commit_prompt)
     extracted_commit = [add_date(day,file) for file in extracted_commit.model_dump()['repository']]
     print('It was at extraction node')
+    print(extracted_commit)
     return {'extracted_commits':extracted_commit}
 
 def compose_node(state:AgentState):
@@ -137,7 +138,7 @@ def compose_node(state:AgentState):
     else:
         backlog_summary = ''
     day_x = len(state.get('compiled_diary_list',[]))+1
-    temp_df['file_patch'] = 'FileName : ' + temp_df['filename'] + 'Patch : ' + temp_df['Patch']
+    temp_df.loc[:,'file_patch'] = 'FileName : ' + temp_df['filename'] + 'Patch : ' + temp_df['Patch']
     patch = temp_df['file_patch'].tolist()
     result = run_compose(day=day_x,commit_logs=patch,previous_summary=backlog_summary)
     info = {'twitter_thread':result['twitter_thread'],'facebook_post':result['facebook_post'].content,
