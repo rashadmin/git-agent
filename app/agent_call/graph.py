@@ -109,7 +109,8 @@ def extraction_node(state:AgentState):
     print(df.head())
     extracted_commits_df = pd.DataFrame().from_records(state.get('extracted_commits',[]))
     if extracted_commits_df.shape[0] > 0:
-        df_to_extract["commit_id"] = df_to_extract["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
+        df_to_extract = df_to_extract.copy()
+        df_to_extract.loc[:,"commit_id"] = df_to_extract["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
         df_to_extract = df_to_extract[~df_to_extract["commit_id"].isin(extracted_commits_df["commit_id"])]
         df_to_extract.drop('commit_id',axis=1,inplace=True)
     temp_message = df_to_extract['message']
