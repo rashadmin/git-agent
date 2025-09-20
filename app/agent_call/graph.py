@@ -22,6 +22,7 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from app.agent_call.composer import run_compose
 from app.agent_call.external import doy_to_date
 from app.models  import User,Post
+from app.extensions import checkpointer
 from app import db
 # ---- State Definition ----
 def add(left, right):
@@ -172,7 +173,7 @@ builder.add_node(compose_node)
 builder.set_entry_point("extraction_node")
 builder.add_edge("extraction_node", "compose_node")
 builder.add_edge("compose_node",END)
-
+graph = builder.compile(checkpointer=checkpointer)
 
 
 

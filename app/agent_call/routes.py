@@ -12,11 +12,12 @@ import pandas as pd
 from app.models import User,Post
 from app import db
 from app.agent_call.external import doy_to_date
-from app.extensions import graph_context
-from app.agent_call.graph import builder
+# from app.extensions import graph_context
+# from app.agent_call.graph import builder
 from langgraph.checkpoint.postgres import PostgresSaver
 import psycopg
-from app.extensions import pool
+from app.agent_call.graph import graph
+# from app.extensions import pool
 import logging
 logging.basicConfig(level=logging.INFO)
 # from app.agent_call.graph import graph
@@ -45,9 +46,7 @@ def health_check():
 # @app.route("/agent")
 def run_agent():
     from app.tasks import extract_commits
-    # global active_thread_id
     event = request.headers.get("X-GitHub-Event")
-    # print(event)
     if event != "push":
         return jsonify({"msg": "Not a push event"}), 200
     print('hereeeeeeeee')
@@ -77,8 +76,7 @@ def compose_text():
         #getting date in db
         config = {"configurable": {"thread_id": thread_id}}
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-        with graph_context() as graph:
-            state = graph.get_state(config=config).values
+        state = graph.get_state(config=config).values
         df = pd.DataFrame().from_records(state['compiled_diary_list'])
         date_in_diary = df['date'].str.split('-',expand=True).rename(columns={0:'year',1:'dayofyear'})
         date_in_diary_val = date_in_diary.apply(yday_to_date, axis=1).values

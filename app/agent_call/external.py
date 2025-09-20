@@ -54,7 +54,7 @@ def format_github_request(repo,after_commit):
     
 
 def get_all_commits(payload):
-    from app.extensions import graph_context
+    from app.agent_call.graph import graph
     repo = payload["repository"]["full_name"]   
     after_commit = payload["after"]            
     GITHUB_API_URL = "https://api.github.com"
@@ -80,9 +80,7 @@ def get_all_commits(payload):
     thread_id = payload['repository']['full_name'].encode("utf-8").hex()
     config = {"configurable": {"thread_id": thread_id}}
     DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-    with graph_context() as graph:
-        print('line 82')
-        state = graph.get_state(config=config).values
+    state = graph.get_state(config=config).values
     df = pd.DataFrame().from_records(state.get('formatted_commits',[]))
     if df.shape[0] > 0:
         df["commit_id"] = df["message"].str.split("Commit_id").str[1].str.split(",").str[0].str.strip().str[2:]
@@ -110,12 +108,10 @@ def get_all_commits(payload):
     return formatted
 
 def text_composer(thread_id):
-    from app.extensions import graph_context
+    from app.agent_call.graph import graph
     config = {"configurable": {"thread_id": thread_id}}
     DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-    with graph_context() as graph:
-        print('line117')
-        state = graph.get_state(config=config).values
+    state = graph.get_state(config=config).values
     
     df = pd.DataFrame().from_records(state['extracted_commits'])
     df_unique_date= sorted(df['date'].unique())
@@ -125,9 +121,7 @@ def text_composer(thread_id):
     sorted(unique_date)
     for date in unique_date:
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-        with graph_context() as graph:
-            print('line 128')
-            state = graph.get_state(config=config).values
+        state = graph.get_state(config=config).values
         
         index = df_unique_date.index(date)
         #GET THE SUMMARY OF THE PREVIOUS COMMIT DATE:
@@ -148,12 +142,9 @@ def text_composer(thread_id):
         df.loc[df['date']==date,'compiled'] = True
         extracted_commits = df.to_dict(orient='records')
         DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-
-        with graph_context() as graph:
-            print('line 151')
-            graph.update_state(
-            {"configurable": {"thread_id": thread_id}},
-            {'extracted_commits':extracted_commits,'compiled_diary_list':[info]})  # marks it as if an agent updated the state
+        graph.update_state(
+        {"configurable": {"thread_id": thread_id}},
+        {'extracted_commits':extracted_commits,'compiled_diary_list':[info]})  # marks it as if an agent updated the state
         
         username = state['user_id']
         user_id = User.query.filter_by(username=username).first().id

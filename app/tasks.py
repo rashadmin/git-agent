@@ -41,18 +41,16 @@ def extract_commits(data):
             try:
                 thread_id = data['repository']['full_name'].encode("utf-8").hex()
                 username = data["repository"]["full_name"].split('/')[0]
-                from app.extensions import graph_context
-
-                with graph_context() as graph:
-                    config = {"configurable": {"thread_id": thread_id}}
-                    graph.invoke(
-                        {
-                            'repo': data['repository']['full_name'],
-                            'formatted_commits': temp_df.to_dict(orient='records'),
-                            'day': day
-                        },
-                        config=config
-                    )
+                from app.agent_call.graph import graph
+                config = {"configurable": {"thread_id": thread_id}}
+                graph.invoke(
+                    {
+                        'repo': data['repository']['full_name'],
+                        'formatted_commits': temp_df.to_dict(orient='records'),
+                        'day': day
+                    },
+                    config=config
+                )
                 success = True  # ✅ success, break the retry loop
 
             except Exception as e:
