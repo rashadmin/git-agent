@@ -12,12 +12,13 @@ from app.posting.linkedin_post import post_linkedin
 from app.posting.twitter_post import post_thread
 @bp.route('/posts/<thread_id>/<date>', methods=['POST'])
 def create_posts(thread_id,date):
-    from app.agent_call.graph import graph
+    from app.extensions import graph_context
     config = {"configurable": {"thread_id": str(thread_id)}}
     print(type(thread_id))
     # time.sleep(1)
     DB_URI = current_app.config['SQLALCHEMY_DATABASE_URI']
-    state = graph.get_state(config=config).values
+    with graph_context() as graph:
+        state = graph.get_state(config=config).values
     username = 'rashadmin'#state['user_id']
     user_id = User.query.filter_by(username=username).first_or_404().id
     if user_id is None:
