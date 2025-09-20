@@ -13,11 +13,11 @@ import pandas as pd
 
 @app.shell_context_processor
 def make_shell_context():
-    # conn = psycopg.connect(DB_URI, autocommit=True)
+    conn = psycopg.connect(DB_URI, autocommit=True)
     
-    # checkpointer = PostgresSaver(conn)
-    # graph = builder.compile(checkpointer=checkpointer)
-    return {'graph':current_app.graph,'user':User,'post':Post,'run':run_compose,'task':Task}
+    checkpointer = PostgresSaver(conn)
+    graph = builder.compile(checkpointer=checkpointer)
+    return {'graph':graph,'user':User,'post':Post,'run':run_compose,'task':Task}
 
 
 

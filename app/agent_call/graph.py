@@ -134,7 +134,7 @@ def compose_node(state:AgentState):
     if index !=0:
         compiled_df = pd.DataFrame().from_records(state['compiled_diary_list'])
         backlog_date = df_unique_date[index-1]
-        backlog_summary = compiled_df[compiled_df['date']==backlog_date]['summary']
+        backlog_summary = compiled_df[compiled_df['date']==backlog_date]['summary'].tolist()[0]
     else:
         backlog_summary = ''
     day_x = len(state.get('compiled_diary_list',[]))+1
