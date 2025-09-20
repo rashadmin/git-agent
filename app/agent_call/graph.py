@@ -126,7 +126,7 @@ def compose_node(state:AgentState):
     df = pd.DataFrame().from_records(state['extracted_commits'])
     day = state['day']
     df_unique_date= sorted(df['date'].unique())
-    temp_df = df[(df['compiled']==False) and (df['date']==day)]
+    temp_df = df[(df['compiled']==False) & (df['date']==day)]
     print(df['compiled'].value_counts())
     index = df_unique_date.index(day)
     #GET THE SUMMARY OF THE PREVIOUS COMMIT DATE:
