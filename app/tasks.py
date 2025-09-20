@@ -46,12 +46,12 @@ def extract_commits(data):
 
                 with graph_context() as graph:
                     config = {"configurable": {"thread_id": thread_id}}
-                    data = {
+                    graph_data = {
                             'repo': data['repository']['full_name'],
                             'formatted_commits': temp_df.to_dict(orient='records'),
                             'day': day
                         }
-                    run_graph(graph, data, config)
+                    run_graph(graph, graph_data, config)
                 success = True  # ✅ success, break the retry loop
 
             except Exception as e:
