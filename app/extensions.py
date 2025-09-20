@@ -47,8 +47,8 @@ DB_URI = "postgresql://postgres.mjmtjvjtuiqxsegqdzar:0KgFAn41OCl86W8M@aws-1-eu-n
 pool = ConnectionPool(
     DB_URI,
     open=True,
-    min_size=3,
-    max_size=5,
+    min_size=4,
+    max_size=10,
     max_idle=300,
     max_lifetime=600,  # recycle before Supabase kills
     kwargs={
