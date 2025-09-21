@@ -65,14 +65,14 @@ linkedin_prompt = ChatPromptTemplate([("system",
 
 def summary_node(state:ComposeState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
-    llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
+    llm = init_chat_model("gemini-2.5-flash-lite", model_provider="google_genai")
     summary_prompt_text = summary_prompt.invoke({'Day':state['day'],'previous_summary':state['previous_summary'],'commit_logs':state['commit_logs']})
     summary = llm.invoke(summary_prompt_text)
     return {'summary':summary}
 
 def twitter_node(state:ComposeState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
-    llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
+    llm = init_chat_model("gemini-2.5-flash-lite", model_provider="google_genai")
     structured_llm = llm.with_structured_output(schema=TwitterThread)
     twitter_prompt_text = twitter_prompt.invoke({'summary':state['summary']})
     twitter_thread = structured_llm.invoke(twitter_prompt_text)
@@ -81,14 +81,14 @@ def twitter_node(state:ComposeState):
 
 def facebook_node(state:ComposeState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
-    llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
+    llm = init_chat_model("gemini-2.5-flash-lite", model_provider="google_genai")
     facebook_prompt_text=facebook_prompt.invoke({'summary':state['summary']})
     facebook_post = llm.invoke(facebook_prompt_text)
     return {'facebook_post':facebook_post}
 
 def linkedin_node(state:ComposeState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
-    llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
+    llm = init_chat_model("gemini-2.5-flash-lite", model_provider="google_genai")
     linkedin_prompt_text=linkedin_prompt.invoke({'summary':state['summary']})
     linkedin_post = llm.invoke(linkedin_prompt_text)
     return {'linkedin_post':linkedin_post}

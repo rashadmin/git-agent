@@ -100,7 +100,7 @@ prompt_template = ChatPromptTemplate([('system',
 
 def extraction_node(state:AgentState):
     os.environ["GOOGLE_API_KEY"] = current_app.config['GOOGLE_API_KEY']# 
-    llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
+    llm = init_chat_model("gemini-2.5-flash-lite", model_provider="google_genai")
     print('could be here \n\n\n\n\n\n')
     # print(state['formatted_commits'])
     df = pd.DataFrame().from_records(state['formatted_commits'])
